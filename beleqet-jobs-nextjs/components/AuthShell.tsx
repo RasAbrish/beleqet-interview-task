@@ -30,12 +30,7 @@ export default function AuthShell({
         />
         <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-darkGreen/80 to-brandGreen/70" />
         <div className="relative z-10 flex h-full flex-col justify-between p-12 text-white">
-          <Link href="/" className="flex items-center gap-2 font-extrabold text-lg">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white text-brandGreen text-sm">
-              B
-            </span>
-            Beleqet Jobs
-          </Link>
+          <div />
           <div>
             <h2 className="text-3xl font-extrabold leading-tight max-w-sm">
               Find your next opportunity, faster.

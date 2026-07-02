@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { IsBoolean, IsEmail, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsOptional, IsString, MinLength, IsArray } from 'class-validator';
 import * as bcrypt from 'bcryptjs';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -31,6 +31,7 @@ class BroadcastDto {
   @IsString() @MinLength(3) title: string;
   @IsString() @MinLength(5) body: string;
   @IsOptional() @IsEnum(ManagedRole) role?: ManagedRole;
+  @IsOptional() @IsArray() @IsString({ each: true }) userIds?: string[];
 }
 class ResolveDisputeDto {
   @IsString() @MinLength(10) resolution: string;
@@ -103,10 +104,23 @@ export class AdminController {
 
   @Post('notifications/broadcast')
   async broadcast(@Body() dto: BroadcastDto) {
-    const users = await this.prisma.user.findMany({
-      where: { isActive: true, ...(dto.role && { role: dto.role }) },
-      select: { id: true },
-    });
+    let users;
+    if (dto.userIds && dto.userIds.length > 0) {
+      users = await this.prisma.user.findMany({
+        where: { id: { in: dto.userIds }, isActive: true },
+        select: { id: true },
+      });
+    } else {
+      users = await this.prisma.user.findMany({
+        where: { isActive: true, ...(dto.role && { role: dto.role }) },
+        select: { id: true },
+      });
+    }
+
+    if (users.length === 0) {
+      return { delivered: 0 };
+    }
+
     const result = await this.prisma.notification.createMany({
       data: users.map((user) => ({
         userId: user.id,

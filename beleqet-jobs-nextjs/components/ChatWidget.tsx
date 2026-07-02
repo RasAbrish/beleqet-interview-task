@@ -12,6 +12,136 @@ const GREETING: Message = {
 
 const SUGGESTIONS = ["How do I apply for a job?", "How do I post a vacancy?", "Find remote jobs"];
 
+function MarkdownContent({ content, isUser }: { content: string; isUser: boolean }) {
+  const parseInline = (text: string): React.ReactNode[] => {
+    const regex = /(\*\*.*?\*\*|`.*?`|\[.*?\]\(.*?\))/g;
+    const parts = text.split(regex);
+    return parts.map((part, idx) => {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        return (
+          <strong key={idx} className={`font-extrabold ${isUser ? "text-white" : "text-primary"}`}>
+            {part.slice(2, -2)}
+          </strong>
+        );
+      }
+      if (part.startsWith("`") && part.endsWith("`")) {
+        return (
+          <code key={idx} className="bg-primary/5 px-1 py-0.5 rounded text-xs font-mono text-brandGreen">
+            {part.slice(1, -1)}
+          </code>
+        );
+      }
+      const linkMatch = part.match(/^\[(.*?)\]\((.*?)\)$/);
+      if (linkMatch) {
+        return (
+          <a
+            key={idx}
+            href={linkMatch[2]}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${
+              isUser
+                ? "text-cyanAccent underline hover:text-white"
+                : "text-brandGreen font-bold underline hover:text-darkGreen"
+            } transition-colors`}
+          >
+            {linkMatch[1]}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
+  const lines = content.split("\n");
+  const blocks: { type: "p" | "ul" | "ol"; items: string[] }[] = [];
+  let currentBlock: { type: "p" | "ul" | "ol"; items: string[] } | null = null;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      if (currentBlock) {
+        blocks.push(currentBlock);
+        currentBlock = null;
+      }
+      continue;
+    }
+
+    const ulMatch = line.match(/^(\s*)[-*]\s+(.*)$/);
+    if (ulMatch) {
+      if (currentBlock && currentBlock.type !== "ul") {
+        blocks.push(currentBlock);
+        currentBlock = null;
+      }
+      if (!currentBlock) {
+        currentBlock = { type: "ul", items: [] };
+      }
+      currentBlock.items.push(ulMatch[2]);
+      continue;
+    }
+
+    const olMatch = line.match(/^(\s*)\d+\.\s+(.*)$/);
+    if (olMatch) {
+      if (currentBlock && currentBlock.type !== "ol") {
+        blocks.push(currentBlock);
+        currentBlock = null;
+      }
+      if (!currentBlock) {
+        currentBlock = { type: "ol", items: [] };
+      }
+      currentBlock.items.push(olMatch[2]);
+      continue;
+    }
+
+    if (currentBlock && currentBlock.type !== "p") {
+      blocks.push(currentBlock);
+      currentBlock = null;
+    }
+    if (!currentBlock) {
+      currentBlock = { type: "p", items: [] };
+    }
+    currentBlock.items.push(line);
+  }
+
+  if (currentBlock) {
+    blocks.push(currentBlock);
+  }
+
+  return (
+    <div className="space-y-2">
+      {blocks.map((block, bIdx) => {
+        if (block.type === "ul") {
+          return (
+            <ul key={bIdx} className="list-disc pl-5 my-1.5 space-y-1">
+              {block.items.map((item, iIdx) => (
+                <li key={iIdx} className="leading-relaxed">
+                  {parseInline(item)}
+                </li>
+              ))}
+            </ul>
+          );
+        }
+        if (block.type === "ol") {
+          return (
+            <ol key={bIdx} className="list-decimal pl-5 my-1.5 space-y-1">
+              {block.items.map((item, iIdx) => (
+                <li key={iIdx} className="leading-relaxed">
+                  {parseInline(item)}
+                </li>
+              ))}
+            </ol>
+          );
+        }
+        return (
+          <p key={bIdx} className="leading-relaxed">
+            {parseInline(block.items.join(" "))}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([GREETING]);
@@ -100,13 +230,13 @@ export default function ChatWidget() {
                 </span>
               )}
               <div
-                className={`max-w-[78%] px-4 py-2.5 text-sm leading-relaxed shadow-sm ${
+                className={`max-w-[78%] px-4 py-2.5 text-sm shadow-sm ${
                   m.role === "user"
                     ? "rounded-2xl rounded-br-md bg-gradient-to-br from-brandGreen to-darkGreen text-white"
                     : "rounded-2xl rounded-bl-md border border-border bg-white text-ink"
                 }`}
               >
-                {m.content}
+                <MarkdownContent content={m.content} isUser={m.role === "user"} />
               </div>
             </div>
           ))}

@@ -45,7 +45,9 @@ export default function PostJobPage() {
             ? "Your session has expired. Please sign in again."
             : "Your company profile could not be checked.",
         );
-      setHasCompany(Boolean(await response.json()));
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : null;
+      setHasCompany(Boolean(data));
     } catch (err) {
       setCompanyCheckError(
         err instanceof Error && err.name !== "TimeoutError"
