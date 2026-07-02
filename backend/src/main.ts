@@ -45,8 +45,8 @@ async function bootstrap() {
   // ── Logging interceptor ───────────────────────────────────────────────────
   app.useGlobalInterceptors(new LoggingInterceptor());
 
-  // ── Swagger (disabled in production) ──────────────────────────────────────
-  if (nodeEnv !== 'production') {
+  // ── Swagger (enabled by default; set SWAGGER_ENABLED=false to disable) ─────
+  if (configService.get<string>('SWAGGER_ENABLED', 'true') !== 'false') {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('Beleqet API')
       .setDescription(
