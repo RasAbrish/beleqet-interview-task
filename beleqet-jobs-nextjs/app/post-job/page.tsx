@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   BriefcaseBusiness,
@@ -25,6 +25,7 @@ export default function PostJobPage() {
   const [publishedId, setPublishedId] = useState("");
   const [hasCompany, setHasCompany] = useState<boolean | null>(null);
   const [companyLoading, setCompanyLoading] = useState(false);
+  const [companyCheckError, setCompanyCheckError] = useState("");
   useEffect(() => {
     fetch(`${API_URL}/jobs/categories`)
       .then((r) => (r.ok ? r.json() : []))
@@ -32,15 +33,32 @@ export default function PostJobPage() {
       .catch(() => setError("Job categories could not be loaded."));
   }, []);
 
+  const checkCompany = useCallback(async () => {
+    setCompanyCheckError("");
+    try {
+      const response = await authenticatedFetch(`${API_URL}/users/company`, {
+        signal: AbortSignal.timeout(60000),
+      });
+      if (!response.ok)
+        throw new Error(
+          response.status === 401
+            ? "Your session has expired. Please sign in again."
+            : "Your company profile could not be checked.",
+        );
+      setHasCompany(Boolean(await response.json()));
+    } catch (err) {
+      setCompanyCheckError(
+        err instanceof Error && err.name !== "TimeoutError"
+          ? err.message
+          : "The server took too long to respond. Please try again.",
+      );
+    }
+  }, []);
+
   useEffect(() => {
     if (!ready || !user || !["EMPLOYER", "ADMIN"].includes(user.role)) return;
-    authenticatedFetch(`${API_URL}/users/company`)
-      .then(async (response) => {
-        if (!response.ok) throw new Error();
-        setHasCompany(Boolean(await response.json()));
-      })
-      .catch(() => setError("Your company profile could not be checked."));
-  }, [ready, user]);
+    checkCompany();
+  }, [ready, user, checkCompany]);
 
   async function createCompany(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -148,10 +166,36 @@ export default function PostJobPage() {
         href="/register"
       />
     );
-  if (ready && user && hasCompany === null)
+  if (ready && user && hasCompany === null && companyCheckError)
     return (
-      <div className="container-page py-24 text-center text-sm font-semibold text-muted">
-        Loading employer workspace…
+      <div className="container-page py-24 text-center">
+        <p className="font-semibold text-redAccent">{companyCheckError}</p>
+        <div className="mt-5 flex flex-wrap justify-center gap-3">
+          <button
+            type="button"
+            onClick={checkCompany}
+            className="rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-brandGreen"
+          >
+            Try again
+          </button>
+          {companyCheckError.includes("expired") && (
+            <Link
+              href="/login?next=/post-job"
+              className="rounded-full border border-primary/15 px-5 py-2.5 text-sm font-bold text-primary"
+            >
+              Sign in
+            </Link>
+          )}
+        </div>
+      </div>
+    );
+  if (!ready || (ready && user && hasCompany === null))
+    return (
+      <div
+        role="status"
+        className="container-page py-24 text-center text-sm font-semibold text-muted"
+      >
+        Loading employer workspace… This can take up to a minute while the server wakes up.
       </div>
     );
   if (ready && user && hasCompany === false)
@@ -173,12 +217,12 @@ export default function PostJobPage() {
             className="mt-8 space-y-4 rounded-[24px] border border-primary/10 bg-white p-6"
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field name="name" label="Company name" required />
-              <Field name="industry" label="Industry" required />
-              <Field name="location" label="Location" required />
-              <Field name="website" label="Website" type="url" />
+              <Field name="name" label="Company name" placeholder="e.g. Acme Ethiopia" required />
+              <Field name="industry" label="Industry" placeholder="e.g. Financial technology" required />
+              <Field name="location" label="Location" placeholder="e.g. Addis Ababa, Ethiopia" required />
+              <Field name="website" label="Website" type="url" placeholder="https://example.com" />
             </div>
-            <TextArea name="description" label="Company description" required />
+            <TextArea name="description" label="Company description" placeholder="Briefly describe your company, mission, and work culture…" required />
             {error && (
               <p className="rounded-xl bg-redAccent/10 p-3 text-sm font-semibold text-redAccent">
                 {error}
@@ -233,7 +277,7 @@ export default function PostJobPage() {
         <form onSubmit={submit} className="space-y-5">
           <FormSection icon={BriefcaseBusiness} title="Role details">
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field name="title" label="Job title" required />
+              <Field name="title" label="Job title" placeholder="e.g. Senior Backend Engineer" required />
               <Select name="categoryId" label="Category" required>
                 <option value="">Select category</option>
                 {categories.map((c) => (
@@ -242,7 +286,7 @@ export default function PostJobPage() {
                   </option>
                 ))}
               </Select>
-              <Field name="location" label="Location" required />
+              <Field name="location" label="Location" placeholder="e.g. Addis Ababa or Remote" required />
               <Select name="type" label="Work type" required>
                 <option value="FULL_TIME">Full time</option>
                 <option value="PART_TIME">Part time</option>
@@ -270,14 +314,16 @@ export default function PostJobPage() {
             <TextArea
               name="description"
               label="Responsibilities and role overview"
+              placeholder="Describe the role's purpose and key responsibilities…"
               required
             />
             <TextArea
               name="requirements"
               label="Requirements and qualifications"
+              placeholder="List the required experience, education, and qualifications…"
               required
             />
-            <Field name="tags" label="Skills (comma separated)" />
+            <Field name="tags" label="Skills (comma separated)" placeholder="e.g. Node.js, PostgreSQL, TypeScript" />
           </FormSection>
           <FormSection
             icon={CircleDollarSign}
@@ -297,7 +343,12 @@ export default function PostJobPage() {
                 min="0"
               />
               <Field name="deadline" label="Application deadline" type="date" />
-              <Field name="applyEmail" label="Application email" type="email" />
+              <Field
+                name="applyEmail"
+                label="Application email"
+                type="email"
+                placeholder="jobs@example.com"
+              />
             </div>
           </FormSection>
           {error && (
@@ -393,6 +444,7 @@ function Field({
   required,
   min,
   defaultValue,
+  placeholder,
 }: {
   name: string;
   label: string;
@@ -400,6 +452,7 @@ function Field({
   required?: boolean;
   min?: string;
   defaultValue?: string;
+  placeholder?: string;
 }) {
   return (
     <label className="block text-xs font-bold text-ink">
@@ -410,6 +463,7 @@ function Field({
         required={required}
         min={min}
         defaultValue={defaultValue}
+        placeholder={placeholder}
         className={control}
       />
     </label>
@@ -439,10 +493,12 @@ function TextArea({
   name,
   label,
   required,
+  placeholder,
 }: {
   name: string;
   label: string;
   required?: boolean;
+  placeholder?: string;
 }) {
   return (
     <label className="mb-4 block text-xs font-bold text-ink">
@@ -452,6 +508,7 @@ function TextArea({
         required={required}
         minLength={20}
         rows={6}
+        placeholder={placeholder}
         className={control}
       />
     </label>

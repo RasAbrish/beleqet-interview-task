@@ -149,6 +149,11 @@ Users
   POST   /users/company         🔒
   GET    /users/notifications   🔒
   PATCH  /users/notifications/:id/read  🔒
+  GET    /users/saved-jobs      🔒
+  POST   /users/saved-jobs/:jobId       🔒
+  DELETE /users/saved-jobs/:jobId       🔒
+  GET    /users/cv-draft        🔒
+  PUT    /users/cv-draft        🔒
 
 Jobs
   GET    /jobs                  (public) ?q=&category=&location=&type=&page=&limit=
@@ -183,6 +188,9 @@ Escrow
 Wallet
   GET    /wallet                🔒
   POST   /wallet/withdraw       🔒
+
+Contact
+  POST   /contact               (public)
 ```
 
 🔒 = requires `Authorization: Bearer <access_token>`

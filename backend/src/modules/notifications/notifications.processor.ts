@@ -23,6 +23,7 @@ export interface EmailPayload {
   to: string;
   subject: string;
   html: string;
+  text?: string;
 }
 
 @Injectable()
@@ -85,7 +86,7 @@ export class NotificationsProcessor {
 
   @Process(NOTIFICATION_JOBS.SEND_EMAIL)
   async sendEmail(job: Job<EmailPayload>) {
-    const { to, subject, html } = job.data;
+    const { to, subject, html, text } = job.data;
     if (!to) return;
 
     try {
@@ -96,6 +97,7 @@ export class NotificationsProcessor {
         to,
         subject,
         html,
+        text,
       });
       this.logger.debug(`Email → ${to}: ${subject}`);
     } catch (e) {

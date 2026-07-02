@@ -4,7 +4,9 @@ import { Queue } from 'bull';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
-import { QUEUE_NAMES, APPLICATION_JOBS, ANALYTICS_JOBS } from '../queues/queues.constants';
+import { QUEUE_NAMES, APPLICATION_JOBS, ANALYTICS_JOBS, NOTIFICATION_JOBS } from '../queues/queues.constants';
+import { ConfigService } from '@nestjs/config';
+import { applicationReceivedEmail, applicationStatusEmail } from '../notifications/email-templates';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 
@@ -19,6 +21,9 @@ export class ApplicationsService {
     private readonly applicationQueue: Queue,
     @InjectQueue(QUEUE_NAMES.ANALYTICS)
     private readonly analyticsQueue: Queue,
+    @InjectQueue(QUEUE_NAMES.NOTIFICATIONS)
+    private readonly notificationsQueue: Queue,
+    private readonly config: ConfigService,
   ) {}
 
   async submit(userId: string, dto: CreateApplicationDto) {
@@ -112,6 +117,22 @@ export class ApplicationsService {
       .add(ANALYTICS_JOBS.UPDATE_JOB_STATS, { jobId: dto.jobId })
       .catch((err) => this.logger.error('Failed to enqueue UPDATE_JOB_STATS', err.message));
 
+    const applicationUrl = `${this.config.get('FRONTEND_URL')}/applications`;
+    applicationReceivedEmail({
+      firstName: application.user.firstName,
+      jobTitle: job.title,
+      companyName: job.company.name,
+      applicationUrl,
+    })
+      .then((email) =>
+        this.notificationsQueue.add(NOTIFICATION_JOBS.SEND_EMAIL, {
+          to: application.user.email,
+          subject: `Application received — ${job.title}`,
+          ...email,
+        }),
+      )
+      .catch((err) => this.logger.error('Failed to enqueue application confirmation email', err.message));
+
     this.eventEmitter.emit('application.submitted', {
       applicationId: application.id,
       jobId: dto.jobId,
@@ -159,6 +180,10 @@ export class ApplicationsService {
     // 1. Verify the application exists AND belongs to a job owned by this employer
     const application = await this.prisma.application.findFirst({
       where: { id, job: { company: { userId: employerId } } },
+      include: {
+        user: { select: { email: true, firstName: true } },
+        job: { select: { title: true } },
+      },
     });
 
     if (!application) {
@@ -181,6 +206,18 @@ export class ApplicationsService {
         body: `Your application status is now ${status.replaceAll('_', ' ').toLowerCase()}.`,
         metadata: { applicationId: id },
       },
+    });
+
+    const email = await applicationStatusEmail({
+      firstName: application.user.firstName,
+      jobTitle: application.job.title,
+      status,
+      applicationUrl: `${this.config.get('FRONTEND_URL')}/applications`,
+    });
+    await this.notificationsQueue.add(NOTIFICATION_JOBS.SEND_EMAIL, {
+      to: application.user.email,
+      subject: `Application update — ${application.job.title}`,
+      ...email,
     });
     return updated;
   }

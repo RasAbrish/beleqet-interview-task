@@ -9,6 +9,7 @@ import { ApplicationsController } from './applications.controller';
     BullModule.registerQueue(
       { name: QUEUE_NAMES.APPLICATION },
       { name: QUEUE_NAMES.ANALYTICS },
+      { name: QUEUE_NAMES.NOTIFICATIONS },
     ),
   ],
   providers: [ApplicationsService],

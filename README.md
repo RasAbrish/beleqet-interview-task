@@ -14,12 +14,13 @@ that consumes it live.
 
 ## Live demo
 
+- **Frontend:** https://beleqet-interview-task-mu.vercel.app
+- **Jobs page:** https://beleqet-interview-task-mu.vercel.app/jobs
+- **API base:** https://beleqet-backend.onrender.com/api/v1
+- **API health check:** https://beleqet-backend.onrender.com/api/v1/jobs/categories
 
-> Fill these in after deploying (see [Deployment](#deployment)).
-
-- **Frontend:** `https://<your-app>.vercel.app`
-- **API + Swagger docs:** `https://<your-backend>.onrender.com/api/docs`
-- **API base:** `https://<your-backend>.onrender.com/api/v1`
+> The Render free-tier API may take about a minute to respond after a period of inactivity.
+> Swagger is available locally at `/api/docs` and disabled in production.
 
 **Seeded demo login** (created automatically on deploy):
 
@@ -48,6 +49,28 @@ Password: Password123!
 - **Skeleton** loading states + Suspense streaming, and route **error boundaries**
 - Full **auth flow**: two-section login & register pages wired to the backend, with a
   client `AuthProvider`, token persistence, and auth-aware header
+- Searchable job listings with category, location, and work-type filters
+- Job details, authenticated save/unsave, application submission, and application tracking
+- Employer company profile, job posting, applicant management, and status updates
+- CV builder with draft persistence, document import, live preview, print/export, and Groq assistance
+- Contact form, notifications, role-aware navigation, and admin management screens
+
+---
+
+## Reviewer guide
+
+Suggested review path:
+
+1. Open the live site and browse `/jobs`; test search and filters.
+2. Register as a job seeker, save a job, submit an application, and view `/applications`.
+3. Open `/cv-maker`, complete a CV, save the draft, and test the print/export preview.
+4. Register as an employer, complete the company profile, post a job, and review applicants.
+5. Review the API architecture, validation, queues, Prisma schema, and Swagger documentation locally.
+
+The project intentionally separates public, job-seeker, employer, and admin workflows. External
+services such as Groq/OpenAI, object storage, Telegram, SMTP, and Chapa require their respective
+environment variables; the core jobs, auth, profile, saved-job, CV-draft, and application flows do
+not require those optional integrations.
 
 ---
 
@@ -76,7 +99,11 @@ cp .env.example .env.local        # NEXT_PUBLIC_API_URL=http://localhost:4000/ap
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3000. Verify the production frontend with:
+
+```bash
+npm run build
+```
 
 ---
 

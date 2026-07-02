@@ -131,10 +131,10 @@ export default function ContactPage() {
                 </p>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field name="name" label="Full name" minLength={2} />
-                <Field name="email" label="Email address" type="email" />
+                <Field name="name" label="Full name" minLength={2} placeholder="e.g. Henok Mekonnen" />
+                <Field name="email" label="Email address" type="email" placeholder="you@example.com" />
               </div>
-              <Field name="subject" label="Subject" minLength={3} />
+              <Field name="subject" label="Subject" minLength={3} placeholder="What do you need help with?" />
               <label className="block text-xs font-bold text-ink">
                 How can we help?
                 <textarea
@@ -143,6 +143,7 @@ export default function ContactPage() {
                   minLength={10}
                   maxLength={5000}
                   rows={7}
+                  placeholder="Tell us how we can help…"
                   className="mt-1.5 w-full rounded-xl border border-primary/10 px-3.5 py-3 text-sm outline-none focus:border-brandGreen"
                 />
               </label>
@@ -174,11 +175,13 @@ function Field({
   label,
   type = "text",
   minLength,
+  placeholder,
 }: {
   name: string;
   label: string;
   type?: string;
   minLength?: number;
+  placeholder?: string;
 }) {
   return (
     <label className="block text-xs font-bold text-ink">
@@ -188,6 +191,7 @@ function Field({
         type={type}
         required
         minLength={minLength}
+        placeholder={placeholder}
         className="mt-1.5 w-full rounded-xl border border-primary/10 px-3.5 py-3 text-sm outline-none focus:border-brandGreen"
       />
     </label>

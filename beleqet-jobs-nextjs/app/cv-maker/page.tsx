@@ -76,6 +76,7 @@ export default function CvMakerPage() {
   const [saved, setSaved] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
+  const [uploadError, setUploadError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -167,8 +168,12 @@ export default function CvMakerPage() {
   function upload(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024)
-      return alert("Please choose a file smaller than 5 MB.");
+    setUploadError("");
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("Please choose a file smaller than 5 MB.");
+      e.target.value = "";
+      return;
+    }
     setUploadedFile(file.name);
   }
 
@@ -234,6 +239,11 @@ export default function CvMakerPage() {
               <FileText className="h-6 w-6 text-brandGreen" />
               {uploadedFile || "Choose PDF, DOC, or DOCX (max 5 MB)"}
             </button>
+            {uploadError && (
+              <p role="alert" className="mt-3 rounded-xl bg-redAccent/10 px-4 py-3 text-sm font-semibold text-redAccent">
+                {uploadError}
+              </p>
+            )}
           </Section>
 
           <Section
@@ -244,32 +254,38 @@ export default function CvMakerPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <Input
                 label="Full name"
+                placeholder="e.g. Henok Mekonnen"
                 value={cv.fullName}
                 onChange={(v) => field("fullName", v)}
               />
               <Input
                 label="Professional title"
+                placeholder="e.g. Senior Product Designer"
                 value={cv.title}
                 onChange={(v) => field("title", v)}
               />
               <Input
                 label="Email"
                 type="email"
+                placeholder="you@example.com"
                 value={cv.email}
                 onChange={(v) => field("email", v)}
               />
               <Input
                 label="Phone"
+                placeholder="e.g. +251 911 234 567"
                 value={cv.phone}
                 onChange={(v) => field("phone", v)}
               />
               <Input
                 label="Location"
+                placeholder="e.g. Addis Ababa, Ethiopia"
                 value={cv.location}
                 onChange={(v) => field("location", v)}
               />
               <Input
                 label="Portfolio or LinkedIn"
+                placeholder="e.g. linkedin.com/in/your-name"
                 value={cv.website}
                 onChange={(v) => field("website", v)}
               />
@@ -338,21 +354,25 @@ export default function CvMakerPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Input
                       label="Job title"
+                      placeholder="e.g. Marketing Manager"
                       value={item.role}
                       onChange={(v) => updateExperience(item.id, "role", v)}
                     />
                     <Input
                       label="Company"
+                      placeholder="e.g. Acme Ethiopia"
                       value={item.company}
                       onChange={(v) => updateExperience(item.id, "company", v)}
                     />
                     <Input
                       label="Start date"
+                      placeholder="e.g. Jan 2022"
                       value={item.start}
                       onChange={(v) => updateExperience(item.id, "start", v)}
                     />
                     <Input
                       label="End date"
+                      placeholder="e.g. Present"
                       value={item.end}
                       onChange={(v) => updateExperience(item.id, "end", v)}
                     />
@@ -366,6 +386,7 @@ export default function CvMakerPage() {
                         updateExperience(item.id, "description", e.target.value)
                       }
                       className={inputClass}
+                      placeholder="Describe your impact using specific results and achievements…"
                     />
                   </label>
                 </div>
@@ -402,11 +423,13 @@ export default function CvMakerPage() {
                 >
                   <Input
                     label="School"
+                    placeholder="e.g. Addis Ababa University"
                     value={item.school}
                     onChange={(v) => updateEducation(item.id, "school", v)}
                   />
                   <Input
                     label="Qualification"
+                    placeholder="e.g. BSc in Computer Science"
                     value={item.qualification}
                     onChange={(v) =>
                       updateEducation(item.id, "qualification", v)
@@ -414,6 +437,7 @@ export default function CvMakerPage() {
                   />
                   <Input
                     label="Year"
+                    placeholder="e.g. 2024"
                     value={item.year}
                     onChange={(v) => updateEducation(item.id, "year", v)}
                   />
@@ -513,17 +537,20 @@ function Input({
   value,
   onChange,
   type = "text",
+  placeholder,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   type?: string;
+  placeholder?: string;
 }) {
   return (
     <label className="block text-xs font-bold text-ink">
       {label}
       <input
         type={type}
+        placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className={inputClass}

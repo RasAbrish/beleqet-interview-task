@@ -10,6 +10,7 @@ import { RegisterDto } from './dto/register.dto';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { QUEUE_NAMES, NOTIFICATION_JOBS } from '../queues/queues.constants';
+import { passwordResetEmail, verificationEmail } from '../notifications/email-templates';
 
 @Injectable()
 export class AuthService {
@@ -97,11 +98,12 @@ export class AuthService {
     });
 
     const verifyUrl = `${this.config.get('FRONTEND_URL')}/auth/verify-email?token=${token}`;
+    const email = await verificationEmail(user.firstName, verifyUrl);
 
     await this.notificationsQueue.add(NOTIFICATION_JOBS.SEND_EMAIL, {
       to: user.email,
       subject: 'Verify your Beleqet Account',
-      html: `<p>Hi ${user.firstName},</p><p>Please verify your email by clicking the link below:</p><p><a href="${verifyUrl}">Verify Email</a></p>`
+      ...email,
     });
   }
 
@@ -135,11 +137,12 @@ export class AuthService {
     });
 
     const resetUrl = `${this.config.get('FRONTEND_URL')}/auth/reset-password?token=${token}`;
+    const emailContent = await passwordResetEmail(user.firstName, resetUrl);
 
     await this.notificationsQueue.add(NOTIFICATION_JOBS.SEND_EMAIL, {
       to: user.email,
       subject: 'Reset your Beleqet Password',
-      html: `<p>Hi ${user.firstName},</p><p>You requested a password reset. Click the link below to set a new password:</p><p><a href="${resetUrl}">Reset Password</a></p>`
+      ...emailContent,
     });
 
     return { success: true, message: 'If an account exists, a reset link was sent.' };

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { BellRing, MessageSquare, Trash2, UserPlus, Users } from "lucide-react";
 import { authenticatedFetch } from "@/lib/auth";
 import { useAuth } from "@/components/AuthProvider";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 const roles = ["JOB_SEEKER", "EMPLOYER", "FREELANCER", "ADMIN"];
@@ -33,6 +34,7 @@ export default function AdminPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [tab, setTab] = useState("users");
   const [notice, setNotice] = useState("");
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
   const load = useCallback(async () => {
     const [u, c] = await Promise.all([
       authenticatedFetch(`${API_URL}/admin/users`),
@@ -81,13 +83,13 @@ export default function AdminPage() {
     if (response.ok) load();
   }
   async function removeUser(id: string) {
-    if (!confirm("Permanently delete this user?")) return;
     const response = await authenticatedFetch(`${API_URL}/admin/users/${id}`, {
       method: "DELETE",
     });
     const data = await response.json();
     setNotice(data.reason || (response.ok ? "User deleted." : data.message));
-    load();
+    setDeleteUserId(null);
+    await load();
   }
   async function updateContact(id: string, status: string) {
     const response = await authenticatedFetch(
@@ -223,7 +225,7 @@ export default function AdminPage() {
                       <td>{new Date(item.createdAt).toLocaleDateString()}</td>
                       <td>
                         <button
-                          onClick={() => removeUser(item.id)}
+                          onClick={() => setDeleteUserId(item.id)}
                           className="text-redAccent"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -290,6 +292,17 @@ export default function AdminPage() {
           </form>
         )}
       </div>
+      <ConfirmDialog
+        open={Boolean(deleteUserId)}
+        onOpenChange={(open) => !open && setDeleteUserId(null)}
+        title="Permanently delete this user?"
+        description="This removes the account and associated access. This action cannot be undone."
+        confirmLabel="Delete user"
+        destructive
+        onConfirm={() => {
+          if (deleteUserId) return removeUser(deleteUserId);
+        }}
+      />
     </div>
   );
 }

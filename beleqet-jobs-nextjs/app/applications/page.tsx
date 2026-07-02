@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { authenticatedFetch } from "@/lib/auth";
 import { useAuth } from "@/components/AuthProvider";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 type Application = {
@@ -39,6 +40,7 @@ export default function ApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [saved, setSaved] = useState<Saved[]>([]);
   const [tab, setTab] = useState("applications");
+  const [withdrawId, setWithdrawId] = useState<string | null>(null);
   const load = useCallback(async () => {
     const [a, s] = await Promise.all([
       authenticatedFetch(`${API_URL}/applications/my`),
@@ -57,12 +59,12 @@ export default function ApplicationsPage() {
       </div>
     );
   async function withdraw(id: string) {
-    if (!confirm("Withdraw this application?")) return;
     const response = await authenticatedFetch(
       `${API_URL}/applications/${id}/withdraw`,
       { method: "PATCH" },
     );
-    if (response.ok) load();
+    if (response.ok) await load();
+    setWithdrawId(null);
   }
   async function unsave(jobId: string) {
     await authenticatedFetch(`${API_URL}/users/saved-jobs/${jobId}`, {
@@ -135,7 +137,7 @@ export default function ApplicationsPage() {
                       item.status,
                     ) && (
                       <button
-                        onClick={() => withdraw(item.id)}
+                        onClick={() => setWithdrawId(item.id)}
                         className="rounded-full px-4 py-2 text-xs font-bold text-redAccent"
                       >
                         Withdraw
@@ -187,6 +189,17 @@ export default function ApplicationsPage() {
           </div>
         )}
       </div>
+      <ConfirmDialog
+        open={Boolean(withdrawId)}
+        onOpenChange={(open) => !open && setWithdrawId(null)}
+        title="Withdraw application?"
+        description="The employer will no longer consider this application. This action cannot be undone."
+        confirmLabel="Withdraw application"
+        destructive
+        onConfirm={() => {
+          if (withdrawId) return withdraw(withdrawId);
+        }}
+      />
     </div>
   );
 }

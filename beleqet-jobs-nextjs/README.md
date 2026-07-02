@@ -1,6 +1,6 @@
 # Beleqet Jobs — Next.js Frontend
 
-Production-ready Next.js 14 (App Router) scaffold for the Beleqet Jobs platform, built from the
+Next.js 14 (App Router) frontend for the Beleqet Jobs platform, built from the
 design system in `Beleqet_Design_Process_Pro.pdf` (colors, typography, layout) and the live
 beleqet.com/vacancy reference.
 
@@ -12,6 +12,8 @@ npm run dev
 ```
 
 Open http://localhost:3000.
+
+Live deployment: https://beleqet-interview-task-mu.vercel.app
 
 ## Stack
 
@@ -28,7 +30,8 @@ app/
   page.tsx             Homepage (Hero, stats, categories, featured jobs, why-choose, CTA)
   jobs/page.tsx         Job listing with search + category/type filters
   jobs/[id]/page.tsx     Job detail page (statically generated per job)
-  about/, pricing/, contact/, cv-maker/, post-job/   Supporting pages
+  applications/, employer/, profile/, admin/   Authenticated role-based pages
+  about/, pricing/, contact/, cv-maker/, post-job/   Supporting and workflow pages
   login/page.tsx, register/page.tsx   Two-section auth pages wired to the backend
 components/            Reusable UI: Header, Footer, Hero, JobCard, AuthShell, forms, etc.
 lib/api.ts              axios client + zod-validated mappers for jobs & categories
@@ -44,6 +47,12 @@ Job, category, and detail data are fetched **live** from the NestJS API and vali
   (`app/page.tsx`, `app/jobs/page.tsx`, `app/jobs/[id]/page.tsx`) with ISR caching (`revalidate`).
 - `lib/auth.ts` + `components/AuthProvider.tsx` — register/login, JWT persistence, and an
   auth-aware header. `components/JobsListing.tsx` filters client-side over server-fetched data.
+- Job cards use context-specific dark/light variants and expose an authenticated save/unsave action.
+- Job seekers can apply with a cover letter, resume, portfolio, and expected salary, then track
+  applications and saved jobs.
+- Employers can manage their company profile, publish jobs, and review applicants.
+- The CV builder supports persistent drafts, file import, live preview, printing, and Groq-assisted
+  summaries. Contact messages and notifications are also connected to the API.
 
 Set `NEXT_PUBLIC_API_URL` (see `.env.example`) to point at the API.
 
@@ -81,4 +90,4 @@ npm run build
 npm start
 ```
 
-Build verified clean (22 static/SSG pages generated) at time of handoff.
+The production build and TypeScript validation were verified successfully at handoff.

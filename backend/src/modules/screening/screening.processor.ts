@@ -33,6 +33,7 @@ import {
   QUEUE_NAMES, APPLICATION_JOBS, NOTIFICATION_JOBS,
   ANALYTICS_JOBS, SCORING,
 } from '../queues/queues.constants';
+import { recruiterApplicationEmail } from '../notifications/email-templates';
 
 // ── Payload types ──────────────────────────────────────────────────────────
 
@@ -221,6 +222,19 @@ export class ScreeningProcessor {
         title: `New application for ${job.data.jobTitle}`,
         body: `${job.data.applicantName} just applied to your job listing.`,
         metadata: { applicationId: job.data.applicationId },
+      });
+
+      const applicationUrl = `${this.config.get('FRONTEND_URL')}/employer`;
+      const email = await recruiterApplicationEmail({
+        firstName: company.user.firstName,
+        applicantName: job.data.applicantName,
+        jobTitle: job.data.jobTitle,
+        applicationUrl,
+      });
+      await this.notificationsQueue.add(NOTIFICATION_JOBS.SEND_EMAIL, {
+        to: company.user.email,
+        subject: `New application — ${job.data.jobTitle}`,
+        ...email,
       });
 
       // Telegram notification if recruiter has connected Telegram

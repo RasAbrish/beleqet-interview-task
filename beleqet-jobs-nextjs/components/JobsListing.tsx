@@ -150,7 +150,7 @@ export default function JobsListing({
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {filtered.map((job) => (
-                <JobCard key={job.id} job={job} />
+                <JobCard key={job.id} job={job} variant="light" />
               ))}
             </div>
           )}
