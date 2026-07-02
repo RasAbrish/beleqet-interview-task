@@ -30,6 +30,7 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
     <section className="container-page py-14">
       <div className="flex items-end justify-between mb-6">
         <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-brandGreen mb-2">Categories</p>
           <h2 className="text-sectionH2">Browse Jobs by Category</h2>
           <p className="text-muted text-sm mt-1">Explore opportunities across growing industries and find jobs that match your skills.</p>
         </div>
@@ -45,7 +46,7 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
             <Link
               key={cat.id}
               href={`/jobs?category=${cat.id}`}
-              className="flex flex-col items-center text-center gap-2 rounded-xl border border-border bg-white px-3 py-5 hover:border-brandGreen hover:shadow-card transition-all"
+              className="flex flex-col items-center text-center gap-2 rounded-xl border border-border bg-white px-3 py-5 hover:border-brandGreen hover:shadow-card hover:-translate-y-0.5 transition-all"
             >
               <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-brandGreen/10 text-brandGreen">
                 <Icon className="h-4.5 w-4.5" />

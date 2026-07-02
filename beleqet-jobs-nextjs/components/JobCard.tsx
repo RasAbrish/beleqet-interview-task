@@ -15,7 +15,7 @@ export default function JobCard({ job }: { job: Job }) {
   return (
     <Link
       href={`/jobs/${job.id}`}
-      className="group flex flex-col rounded-xl border border-border bg-white p-5 hover:border-brandGreen hover:shadow-card transition-all"
+      className="group flex flex-col rounded-xl border border-border bg-white p-5 hover:border-brandGreen hover:shadow-card hover:-translate-y-0.5 transition-all"
     >
       <div className="flex items-start justify-between">
         <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-pageBg text-muted">

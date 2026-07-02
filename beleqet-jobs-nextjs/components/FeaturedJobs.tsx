@@ -10,6 +10,7 @@ export default function FeaturedJobs({ jobs }: { jobs: Job[] }) {
       <div className="container-page py-14">
         <div className="flex items-end justify-between mb-6">
           <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-brandGreen mb-2">Opportunities</p>
             <h2 className="text-sectionH2">Featured Jobs</h2>
             <p className="text-muted text-sm mt-1">Fresh opportunities from companies hiring right now.</p>
           </div>
