@@ -3,12 +3,18 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Search, MapPin, SlidersHorizontal } from "lucide-react";
-import { jobs, categories } from "@/lib/mockData";
+import type { Job, Category } from "@/lib/api";
 import JobCard from "@/components/JobCard";
 
-const jobTypes = ["Full Time", "Part Time", "Remote", "Hybrid", "On-site", "Contract"];
+const jobTypes = ["Full Time", "Part Time", "Remote", "Hybrid", "Contract"];
 
-export default function JobsListing() {
+export default function JobsListing({
+  initialJobs,
+  categories,
+}: {
+  initialJobs: Job[];
+  categories: Category[];
+}) {
   const searchParams = useSearchParams();
 
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
@@ -17,7 +23,7 @@ export default function JobsListing() {
   const [type, setType] = useState<string>("");
 
   const filtered = useMemo(() => {
-    return jobs.filter((job) => {
+    return initialJobs.filter((job) => {
       const matchesQuery =
         !query ||
         job.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -27,7 +33,7 @@ export default function JobsListing() {
       const matchesType = !type || job.type === type;
       return matchesQuery && matchesLocation && matchesCategory && matchesType;
     });
-  }, [query, location, category, type]);
+  }, [initialJobs, query, location, category, type]);
 
   return (
     <div className="container-page py-10">
@@ -64,7 +70,7 @@ export default function JobsListing() {
             <h3 className="flex items-center gap-2 text-sm font-semibold text-ink mb-4">
               <SlidersHorizontal className="h-4 w-4" /> Category
             </h3>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-80 overflow-y-auto">
               <button
                 onClick={() => setCategory("")}
                 className={`block w-full text-left text-sm px-3 py-2 rounded-lg transition-colors ${
@@ -82,7 +88,7 @@ export default function JobsListing() {
                   }`}
                 >
                   <span>{cat.label}</span>
-                  <span className="text-xs">{cat.count}</span>
+                  {cat.count ? <span className="text-xs">{cat.count}</span> : null}
                 </button>
               ))}
             </div>

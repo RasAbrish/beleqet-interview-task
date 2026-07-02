@@ -6,10 +6,11 @@ import {
   HeartPulse,
   GraduationCap,
   Cog,
+  Briefcase,
   MoreHorizontal,
   type LucideIcon,
 } from "lucide-react";
-import { categories } from "@/lib/mockData";
+import type { Category } from "@/lib/api";
 
 const iconMap: Record<string, LucideIcon> = {
   laptop: Laptop,
@@ -18,10 +19,13 @@ const iconMap: Record<string, LucideIcon> = {
   "heart-pulse": HeartPulse,
   "graduation-cap": GraduationCap,
   cog: Cog,
+  briefcase: Briefcase,
   "more-horizontal": MoreHorizontal,
 };
 
-export default function CategoryGrid() {
+export default function CategoryGrid({ categories }: { categories: Category[] }) {
+  if (!categories.length) return null;
+
   return (
     <section className="container-page py-14">
       <div className="flex items-end justify-between mb-6">
@@ -36,7 +40,7 @@ export default function CategoryGrid() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
         {categories.map((cat) => {
-          const Icon = iconMap[cat.icon] ?? MoreHorizontal;
+          const Icon = iconMap[cat.icon] ?? Briefcase;
           return (
             <Link
               key={cat.id}
@@ -47,7 +51,7 @@ export default function CategoryGrid() {
                 <Icon className="h-4.5 w-4.5" />
               </span>
               <span className="text-xs font-semibold text-ink">{cat.label}</span>
-              <span className="text-[11px] text-muted">{cat.count} jobs</span>
+              {cat.count ? <span className="text-[11px] text-muted">{cat.count} jobs</span> : null}
             </Link>
           );
         })}

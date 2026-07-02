@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MapPin, Bookmark, Building2 } from "lucide-react";
-import type { Job } from "@/lib/mockData";
+import type { Job } from "@/lib/api";
 
 const typeStyles: Record<string, string> = {
   "Full Time": "bg-brandGreen/10 text-brandGreen",

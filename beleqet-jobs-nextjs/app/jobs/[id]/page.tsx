@@ -1,17 +1,16 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MapPin, Clock, Building2, ArrowLeft } from "lucide-react";
-import { jobs } from "@/lib/mockData";
+import { fetchJob, fetchJobs } from "@/lib/api";
 
-export function generateStaticParams() {
-  return jobs.map((job) => ({ id: job.id }));
-}
+export const revalidate = 300;
 
-export default function JobDetailPage({ params }: { params: { id: string } }) {
-  const job = jobs.find((j) => j.id === params.id);
+export default async function JobDetailPage({ params }: { params: { id: string } }) {
+  const job = await fetchJob(params.id);
   if (!job) notFound();
 
-  const related = jobs.filter((j) => j.category === job.category && j.id !== job.id).slice(0, 3);
+  const all = await fetchJobs();
+  const related = all.filter((j) => j.category === job.category && j.id !== job.id).slice(0, 3);
 
   return (
     <div className="container-page py-10">
@@ -48,7 +47,7 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
               <p className="text-sm text-muted leading-relaxed">{job.description}</p>
             </div>
 
-            {job.tags && (
+            {job.tags && job.tags.length > 0 && (
               <div className="mt-6 flex flex-wrap gap-2">
                 {job.tags.map((tag) => (
                   <span key={tag} className="text-xs font-medium text-muted bg-pageBg border border-border rounded-full px-3 py-1">

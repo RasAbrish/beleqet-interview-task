@@ -1,0 +1,48 @@
+services:
+  - type: keyvalue
+    name: beleqet-redis
+    plan: free
+    region: oregon
+    maxmemoryPolicy: noeviction
+    ipAllowList: []
+
+  - type: web
+    name: beleqet-backend
+    runtime: docker
+    plan: free
+    region: oregon
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/jobs/categories
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_HOST
+        fromService:
+          name: beleqet-redis
+          type: keyvalue
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          name: beleqet-redis
+          type: keyvalue
+          property: port
+      - key: REDIS_TLS
+        value: "false"
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRES
+        value: 15m
+      - key: JWT_REFRESH_EXPIRES
+        value: 30d
+      - key: BULL_BOARD_USERNAME
+        value: admin
+      - key: BULL_BOARD_PASSWORD
+        generateValue: true
+      - key: OPENAI_API_KEY
+        value: dummy_key_for_testing
+      - key: FRONTEND_URL
+        sync: false

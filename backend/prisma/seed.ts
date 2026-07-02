@@ -50,6 +50,70 @@ async function main() {
   ]);
   console.log('✅ Freelance categories created');
 
+  const bySlug = Object.fromEntries(categories.map((c) => [c.slug, c.id]));
+
+  const employer = await prisma.user.upsert({
+    where: { email: 'employer@beleqet.demo' },
+    update: {},
+    create: {
+      email: 'employer@beleqet.demo',
+      passwordHash: await bcrypt.hash('Password123!', 10),
+      firstName: 'Beleqet',
+      lastName: 'Employer',
+      role: 'EMPLOYER',
+      emailVerified: true,
+    },
+  });
+
+  const company = await prisma.company.upsert({
+    where: { userId: employer.id },
+    update: {},
+    create: {
+      userId: employer.id,
+      name: 'Beleqet Talent Network',
+      description: 'Connecting Ethiopian employers with verified talent across the country.',
+      location: 'Addis Ababa',
+      verified: true,
+    },
+  });
+
+  const demoJobs: {
+    id: string; title: string; slug: string; location: string; type: string;
+    featured: boolean; tags: string[]; companyName: string; description: string;
+  }[] = [
+    { id: '11111111-1111-1111-1111-111111111101', title: 'Full Stack Developer', slug: 'software-design-and-development', location: 'Addis Ababa', type: 'FULL_TIME', featured: true, tags: ['React', 'Node.js', 'PostgreSQL'], companyName: 'TakaCash', description: 'Build and maintain customer-facing fintech products across a Next.js front end and Node services, shipping features end to end with product and design.' },
+    { id: '11111111-1111-1111-1111-111111111102', title: 'Digital Marketing Specialist', slug: 'marketing-and-advertisement', location: 'Addis Ababa', type: 'HYBRID', featured: true, tags: ['SEO', 'Paid Ads', 'Content'], companyName: 'ethio telecom', description: 'Plan and execute digital campaigns across search, social, and Telegram channels, owning performance reporting and qualified lead growth.' },
+    { id: '11111111-1111-1111-1111-111111111103', title: 'Customer Service Agent', slug: 'customer-service-and-care', location: 'Addis Ababa', type: 'FULL_TIME', featured: true, tags: ['Customer Care', 'Banking'], companyName: 'Dashen Bank', description: 'Handle customer inquiries across branch and digital channels, resolve account issues, and maintain service standards.' },
+    { id: '11111111-1111-1111-1111-111111111104', title: 'Graphic Designer', slug: 'creative-art-and-design', location: 'Remote', type: 'REMOTE', featured: true, tags: ['Figma', 'Branding'], companyName: 'System One', description: 'Design marketing assets, social creatives, and brand collateral for a fast-moving product team. Portfolio required.' },
+    { id: '11111111-1111-1111-1111-111111111105', title: 'Senior Accountant', slug: 'accounting-and-finance', location: 'Addis Ababa', type: 'FULL_TIME', featured: true, tags: ['Accounting', 'Finance'], companyName: 'BN Star Trading Plc.', description: 'Manage the general ledger, monthly closing, and financial reporting for a growing trading company.' },
+    { id: '11111111-1111-1111-1111-111111111106', title: 'IT Support Officer', slug: 'information-technology', location: 'Addis Ababa', type: 'FULL_TIME', featured: false, tags: ['Networking', 'Support'], companyName: 'Zemen Bank', description: 'Provide first-line IT support, maintain workstations and networks, and resolve incidents across the head office.' },
+    { id: '11111111-1111-1111-1111-111111111107', title: 'HR & Admin Officer', slug: 'human-resource-and-talent-management', location: 'Addis Ababa', type: 'FULL_TIME', featured: false, tags: ['HR', 'Operations'], companyName: 'Safaricom Ethiopia', description: 'Support recruitment, onboarding, and day-to-day HR administration for the Addis Ababa office.' },
+    { id: '11111111-1111-1111-1111-111111111108', title: 'Frontend Engineer', slug: 'software-design-and-development', location: 'Remote', type: 'CONTRACT', featured: false, tags: ['Next.js', 'TypeScript', 'Tailwind'], companyName: 'Beleqet Talent Network', description: 'Build responsive, accessible interfaces in Next.js and TypeScript, collaborating with designers on a component-driven design system.' },
+  ];
+
+  await Promise.all(
+    demoJobs.map((j) =>
+      prisma.job.upsert({
+        where: { id: j.id },
+        update: {},
+        create: {
+          id: j.id,
+          title: j.title,
+          description: j.description,
+          location: j.location,
+          type: j.type as never,
+          featured: j.featured,
+          tags: j.tags,
+          companyName: j.companyName,
+          status: 'PUBLISHED',
+          categoryId: bySlug[j.slug],
+          companyId: company.id,
+        },
+      }),
+    ),
+  );
+  console.log('✅ Demo jobs created');
+
   console.log('\n🎉 Database seeded successfully with Production Categories!');
 }
 
