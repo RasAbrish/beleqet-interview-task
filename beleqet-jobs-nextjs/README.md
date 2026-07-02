@@ -29,20 +29,23 @@ app/
   jobs/page.tsx         Job listing with search + category/type filters
   jobs/[id]/page.tsx     Job detail page (statically generated per job)
   about/, pricing/, contact/, cv-maker/, post-job/   Supporting pages
-components/            Reusable UI: Header, Footer, Hero, JobCard, CategoryGrid, etc.
-lib/mockData.ts         Mock jobs, categories, and stats — swap for real API calls
+  login/page.tsx, register/page.tsx   Two-section auth pages wired to the backend
+components/            Reusable UI: Header, Footer, Hero, JobCard, AuthShell, forms, etc.
+lib/api.ts              axios client + zod-validated mappers for jobs & categories
+lib/auth.ts             axios auth calls (register/login) + token persistence
+lib/mockData.ts         Static marketing content only (stats, popular searches)
 ```
 
-## Connecting real data
+## Data & auth (live backend)
 
-All job/category/stat data currently lives in `lib/mockData.ts`. To wire this to your backend:
+Job, category, and detail data are fetched **live** from the NestJS API and validated with **zod**:
 
-1. Replace the static arrays with `fetch()` calls (e.g. in Server Components, fetch directly in
-   `app/page.tsx` / `app/jobs/page.tsx`).
-2. `app/jobs/[id]/page.tsx` uses `generateStaticParams()` for static generation — switch to
-   `fetch` + `dynamic = "force-dynamic"` (or ISR via `revalidate`) once jobs come from a live API.
-3. The search/filter logic in `components/JobsListing.tsx` is client-side over the mock array —
-   move filtering server-side (query params → API call) once you have a real endpoint.
+- `lib/api.ts` — `fetchJobs` / `fetchJob` / `fetchCategories`, consumed in Server Components
+  (`app/page.tsx`, `app/jobs/page.tsx`, `app/jobs/[id]/page.tsx`) with ISR caching (`revalidate`).
+- `lib/auth.ts` + `components/AuthProvider.tsx` — register/login, JWT persistence, and an
+  auth-aware header. `components/JobsListing.tsx` filters client-side over server-fetched data.
+
+Set `NEXT_PUBLIC_API_URL` (see `.env.example`) to point at the API.
 
 ## Fonts
 

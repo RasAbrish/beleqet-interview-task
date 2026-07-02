@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
 import { Search, MapPin, ShieldCheck, BellRing, Send } from "lucide-react";
 import { popularSearches } from "@/lib/mockData";
 
@@ -102,10 +103,16 @@ export default function Hero() {
         </div>
 
         <div className="relative hidden md:block">
-          <div className="aspect-[4/5] rounded-3xl bg-gradient-to-b from-white/10 to-transparent border border-white/10 flex items-end justify-center overflow-hidden">
-            <div className="w-2/3 mb-0 rounded-t-3xl bg-white/5 h-3/4 flex items-center justify-center text-white/30 text-sm">
-              Mobile app preview
-            </div>
+          <div className="relative aspect-[4/5] rounded-3xl overflow-hidden border border-white/10 shadow-cardHover">
+            <Image
+              src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1000&q=80"
+              alt="A professional hired through Beleqet Jobs"
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 40vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-primary/50 to-transparent" />
           </div>
           <div className="absolute top-6 -left-6 rounded-xl bg-white text-ink px-4 py-3 shadow-cardHover text-xs w-44">
             <p className="font-semibold flex items-center gap-1.5">
