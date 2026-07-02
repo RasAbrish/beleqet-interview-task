@@ -92,6 +92,29 @@ async function renderTemplate(content: EmailContent) {
   return { html, text: toPlainText(html) };
 }
 
+export function welcomeEmail(firstName: string, role: string, dashboardUrl: string) {
+  const roleLabel = role === 'EMPLOYER' ? 'employer' : role === 'FREELANCER' ? 'freelancer' : 'job seeker';
+  const roleAction = role === 'EMPLOYER'
+    ? 'Post your first job listing and start reaching thousands of talented candidates across Ethiopia.'
+    : role === 'FREELANCER'
+    ? 'Complete your freelancer profile and start bidding on exciting projects.'
+    : 'Browse open positions, save your favourites, and apply with one click.';
+
+  return renderTemplate({
+    preview: `Welcome to Beleqet, ${firstName}! Your account is ready.`,
+    eyebrow: 'Welcome aboard',
+    title: `Great to have you, ${firstName}!`,
+    greeting: `Hello ${firstName},`,
+    paragraphs: [
+      `Your Beleqet account has been created successfully as a ${roleLabel}.`,
+      roleAction,
+      'If you have any questions or need help getting started, our support team is always here for you.',
+    ],
+    action: { label: 'Go to my dashboard', url: dashboardUrl },
+    footnote: 'You received this email because you created a Beleqet account. Welcome to the platform!',
+  });
+}
+
 export function verificationEmail(firstName: string, verifyUrl: string) {
   return renderTemplate({
     preview: 'Verify your email to finish setting up your Beleqet account.',
@@ -170,6 +193,74 @@ export function applicationStatusEmail(input: {
     action: { label: 'View application', url: input.applicationUrl },
   });
 }
+
+export function loginAlertEmail(firstName: string, deviceDetails?: string) {
+  const dateStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Addis_Ababa' });
+  return renderTemplate({
+    preview: 'New login detected on your Beleqet account.',
+    eyebrow: 'Security Alert',
+    title: 'New Login Detected',
+    greeting: `Hello ${firstName},`,
+    paragraphs: [
+      `We detected a successful sign-in to your Beleqet account on ${dateStr} (East Africa Time).`,
+      deviceDetails ? `Device / Browser info: ${deviceDetails}` : 'If this was you, no action is required.',
+      'If you do not recognize this login, please change your password immediately to protect your account.'
+    ],
+    footnote: 'This is a security notification. Do not share your login credentials with anyone.',
+  });
+}
+
+export function logoutAlertEmail(firstName: string) {
+  return renderTemplate({
+    preview: 'You have been successfully logged out from Beleqet.',
+    eyebrow: 'Account Security',
+    title: 'Logged Out Successfully',
+    greeting: `Hello ${firstName},`,
+    paragraphs: [
+      'You have successfully signed out of your Beleqet session. Your active login token for this device has been invalidated.',
+      'Thank you for using Beleqet to manage your professional path.'
+    ],
+  });
+}
+
+export function adminAnnouncementEmail(firstName: string, announcementTitle: string, announcementBody: string) {
+  return renderTemplate({
+    preview: `Announcement: ${announcementTitle}`,
+    eyebrow: 'System Announcement',
+    title: announcementTitle,
+    greeting: `Hello ${firstName},`,
+    paragraphs: [announcementBody],
+  });
+}
+
+export function jobPostConfirmationEmail(firstName: string, jobTitle: string, viewJobUrl: string) {
+  return renderTemplate({
+    preview: `Your job listing "${jobTitle}" is live!`,
+    eyebrow: 'Job Posted',
+    title: 'Your Job Listing is Live',
+    greeting: `Hello ${firstName},`,
+    paragraphs: [
+      `Congratulations! Your new job posting for "${jobTitle}" has been successfully published on Beleqet.`,
+      'Job seekers can now view and apply to your vacancy. You will receive email notifications as soon as candidates submit applications.'
+    ],
+    action: { label: 'View Job Listing', url: viewJobUrl },
+  });
+}
+
+export function jobAlertEmail(firstName: string, jobTitle: string, companyName: string, viewJobUrl: string) {
+  return renderTemplate({
+    preview: `New job matching your profile: ${jobTitle} at ${companyName}.`,
+    eyebrow: 'Job Alert',
+    title: 'New Opportunity for You',
+    greeting: `Hello ${firstName},`,
+    paragraphs: [
+      `A new job matching your interests has been posted: "${jobTitle}" at ${companyName}.`,
+      'Be one of the first to apply to increase your chances of getting hired!'
+    ],
+    action: { label: 'View Vacancy', url: viewJobUrl },
+  });
+}
+
 
 const styles: Record<string, React.CSSProperties> = {
   body: { backgroundColor: colors.page, color: colors.dark, fontFamily: 'Arial, Helvetica, sans-serif', margin: 0, padding: '32px 12px' },

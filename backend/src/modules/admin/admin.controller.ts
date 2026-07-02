@@ -7,6 +7,10 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { QUEUE_NAMES, NOTIFICATION_JOBS } from '../queues/queues.constants';
+import { adminAnnouncementEmail } from '../notifications/email-templates';
 
 enum ManagedRole {
   JOB_SEEKER = 'JOB_SEEKER',
@@ -54,7 +58,10 @@ const safeUserSelect = {
 @Roles('ADMIN')
 @Controller('admin')
 export class AdminController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @InjectQueue(QUEUE_NAMES.NOTIFICATIONS) private readonly notificationsQueue: Queue,
+  ) {}
 
   @Get('users')
   @ApiOperation({ summary: 'List all users' })
@@ -108,12 +115,12 @@ export class AdminController {
     if (dto.userIds && dto.userIds.length > 0) {
       users = await this.prisma.user.findMany({
         where: { id: { in: dto.userIds }, isActive: true },
-        select: { id: true },
+        select: { id: true, email: true, firstName: true },
       });
     } else {
       users = await this.prisma.user.findMany({
         where: { isActive: true, ...(dto.role && { role: dto.role }) },
-        select: { id: true },
+        select: { id: true, email: true, firstName: true },
       });
     }
 
@@ -130,6 +137,20 @@ export class AdminController {
         body: dto.body,
       })),
     });
+
+    // Enqueue emails
+    for (const u of users) {
+      adminAnnouncementEmail(u.firstName, dto.title, dto.body)
+        .then((email) =>
+          this.notificationsQueue.add(NOTIFICATION_JOBS.SEND_EMAIL, {
+            to: u.email,
+            subject: dto.title,
+            ...email,
+          })
+        )
+        .catch(() => {});
+    }
+
     return { delivered: result.count };
   }
 

@@ -1,4 +1,5 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadsService } from './uploads.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -33,5 +34,12 @@ export class UploadsController {
       body.contentType, 
       body.folder || 'misc'
     );
+  }
+
+  @Post('file')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Upload file directly to cloud storage' })
+  async uploadFile(@UploadedFile() file: any) {
+    return this.uploadsService.uploadFile(file, 'resumes');
   }
 }

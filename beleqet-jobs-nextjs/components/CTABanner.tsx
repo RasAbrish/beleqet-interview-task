@@ -23,7 +23,7 @@ export default function CTABanner() {
           </div>
           <div className="flex flex-wrap gap-3">
             <a
-              href="https://t.me"
+              href="https://t.me/BeleqetJobs"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-bold text-white transition hover:bg-brandGreen"

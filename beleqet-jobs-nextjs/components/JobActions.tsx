@@ -62,28 +62,21 @@ export default function JobActions({ jobId }: { jobId: string }) {
       throw new Error("Resume must be a PDF, DOC, or DOCX file.");
     if (file.size > 5 * 1024 * 1024)
       throw new Error("Resume must be smaller than 5 MB.");
-    const signed = await authenticatedFetch(
-      `${API_URL}/uploads/presigned-url`,
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await authenticatedFetch(
+      `${API_URL}/uploads/file`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          filename: file.name,
-          contentType: file.type,
-          folder: "resumes",
-        }),
+        body: formData,
       },
     );
-    const upload = await signed.json();
-    if (!signed.ok)
-      throw new Error(upload.message || "Resume upload could not be prepared.");
-    const put = await fetch(upload.presignedUrl, {
-      method: "PUT",
-      headers: { "Content-Type": file.type },
-      body: file,
-    });
-    if (!put.ok) throw new Error("Resume upload failed. Please try again.");
-    return upload.publicUrl;
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data.message || "Resume upload failed. Please try again.");
+    return data.publicUrl;
   }
 
   async function submitApplication(event: FormEvent<HTMLFormElement>) {

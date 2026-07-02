@@ -10,7 +10,7 @@ import { RegisterDto } from './dto/register.dto';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { QUEUE_NAMES, NOTIFICATION_JOBS } from '../queues/queues.constants';
-import { passwordResetEmail, verificationEmail } from '../notifications/email-templates';
+import { passwordResetEmail, verificationEmail, loginAlertEmail, logoutAlertEmail, welcomeEmail } from '../notifications/email-templates';
 
 @Injectable()
 export class AuthService {
@@ -42,10 +42,29 @@ export class AuthService {
 
     this.logger.log(`New user registered: ${user.email} (${user.role})`);
 
-    // Fire-and-forget: email queue failure must NOT crash registration
+    // Fire-and-forget: email queue failures must NOT crash registration
     this.sendVerificationEmail(user.id).catch((err) =>
       this.logger.error(`Failed to enqueue verification email for ${user.email}: ${err.message}`)
     );
+
+    // Send personalised welcome email
+    const frontendUrl = this.config.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
+    const dashboardUrl = user.role === 'EMPLOYER'
+      ? `${frontendUrl}/employer`
+      : user.role === 'FREELANCER'
+      ? `${frontendUrl}/profile`
+      : `${frontendUrl}/jobs`;
+    welcomeEmail(user.firstName, user.role, dashboardUrl)
+      .then((email) =>
+        this.notificationsQueue.add(NOTIFICATION_JOBS.SEND_EMAIL, {
+          to: user.email,
+          subject: `Welcome to Beleqet, ${user.firstName}!`,
+          ...email,
+        })
+      )
+      .catch((err) =>
+        this.logger.error(`Failed to enqueue welcome email for ${user.email}: ${err.message}`)
+      );
 
     return this.issueTokens(user);
   }
@@ -60,7 +79,18 @@ export class AuthService {
     return user;
   }
 
-  async login(user: { id: string; email: string; firstName: string; lastName: string; role: string }) {
+  async login(user: { id: string; email: string; firstName: string; lastName: string; role: string }, userAgent?: string) {
+    loginAlertEmail(user.firstName, userAgent)
+      .then((email) =>
+        this.notificationsQueue.add(NOTIFICATION_JOBS.SEND_EMAIL, {
+          to: user.email,
+          subject: 'New login detected on your Beleqet account',
+          ...email,
+        })
+      )
+      .catch((err) =>
+        this.logger.error(`Failed to enqueue login alert email for ${user.email}: ${err.message}`)
+      );
     return this.issueTokens(user);
   }
 
@@ -80,7 +110,21 @@ export class AuthService {
   }
 
   async logout(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { email: true, firstName: true } });
     await this.prisma.refreshToken.deleteMany({ where: { userId } });
+    if (user) {
+      logoutAlertEmail(user.firstName)
+        .then((email) =>
+          this.notificationsQueue.add(NOTIFICATION_JOBS.SEND_EMAIL, {
+            to: user.email,
+            subject: 'You have logged out from Beleqet',
+            ...email,
+          })
+        )
+        .catch((err) =>
+          this.logger.error(`Failed to enqueue logout alert email for ${user.email}: ${err.message}`)
+        );
+    }
   }
 
   async sendVerificationEmail(userId: string) {

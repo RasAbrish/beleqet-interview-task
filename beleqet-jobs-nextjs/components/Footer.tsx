@@ -8,7 +8,7 @@ const footerColumns = [
       { label: "Find Jobs", href: "/jobs" },
       { label: "Browse Categories", href: "/jobs" },
       { label: "CV Maker", href: "/cv-maker" },
-      { label: "Telegram Alerts", href: "https://t.me" },
+      { label: "Telegram Alerts", href: "https://t.me/BeleqetJobs" },
     ],
   },
   {
@@ -25,7 +25,7 @@ const footerColumns = [
     links: [
       { label: "Addis Ababa, Ethiopia", href: "/contact" },
       { label: "beleqet.com", href: "https://beleqet.com" },
-      { label: "Telegram Channel", href: "https://t.me" },
+      { label: "Telegram Channel", href: "https://t.me/BeleqetJobs" },
       { label: "Support Center", href: "/contact" },
     ],
   },

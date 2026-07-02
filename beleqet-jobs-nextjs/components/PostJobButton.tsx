@@ -6,9 +6,9 @@ import { useAuth } from "@/components/AuthProvider";
 
 export default function PostJobButton({ className = "" }: { className?: string }) {
   const { user, ready } = useAuth();
-  if (!ready) return null;
+  if (!ready || !user) return null;
 
-  const canPost = !user || user.role === "EMPLOYER" || user.role === "ADMIN";
+  const canPost = user.role === "EMPLOYER" || user.role === "ADMIN";
   if (!canPost) return null;
 
   return (

@@ -20,9 +20,10 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login and receive JWT tokens' })
-  async login(@Body() dto: LoginDto) {
+  async login(@Body() dto: LoginDto, @Request() req: any) {
     const user = await this.authService.validateUser(dto.email, dto.password);
-    return this.authService.login(user);
+    const userAgent = req.headers['user-agent'];
+    return this.authService.login(user, userAgent);
   }
 
   @Post('refresh')

@@ -7,18 +7,27 @@ import { BriefcaseBusiness, Menu, X } from "lucide-react";
 import HeaderAuth from "@/components/HeaderAuth";
 import PostJobButton from "@/components/PostJobButton";
 import NotificationBell from "@/components/NotificationBell";
+import { useAuth } from "@/components/AuthProvider";
 
-const navItems = [
-  { label: "Find jobs", href: "/jobs" },
-  { label: "For employers", href: "/post-job" },
-  { label: "CV maker", href: "/cv-maker" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "About", href: "/about" },
-];
 
 export default function Header() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  // Context-aware "For employers" link
+  const employerHref =
+    user && ["EMPLOYER", "ADMIN"].includes(user.role)
+      ? "/employer"
+      : "/post-job";
+
+  const navItems = [
+    { label: "Find jobs", href: "/jobs" },
+    { label: "For employers", href: employerHref },
+    { label: "CV maker", href: "/cv-maker" },
+    { label: "Pricing", href: "/pricing" },
+    { label: "About", href: "/about" },
+  ];
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -48,7 +57,7 @@ export default function Header() {
             const active = isActive(item.href);
             return (
               <Link
-                key={item.href}
+                key={item.label}
                 href={item.href}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                   active
@@ -92,7 +101,7 @@ export default function Header() {
               const active = isActive(item.href);
               return (
                 <Link
-                  key={item.href}
+                  key={item.label}
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className={`flex items-center border-b border-primary/10 py-3.5 text-sm font-semibold transition-colors ${
@@ -117,3 +126,4 @@ export default function Header() {
     </header>
   );
 }
+

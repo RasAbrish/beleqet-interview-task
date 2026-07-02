@@ -71,4 +71,34 @@ export class UploadsService {
 
     return { presignedUrl, publicUrl, key };
   }
+
+  async uploadFile(file: any, folder = 'misc') {
+    if (!this.s3Client)
+      throw new InternalServerErrorException('Cloud storage not configured on server');
+
+    const ext = path.extname(file.originalname);
+    const key = `${folder}/${uuidv4()}${ext}`;
+
+    const command = new PutObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    });
+
+    await this.s3Client.send(command);
+
+    const publicBaseUrl = this.config.get<string>('R2_PUBLIC_BASE_URL');
+    const endpoint = this.config.get<string>('AWS_ENDPOINT');
+    let publicUrl = '';
+    if (publicBaseUrl) {
+      publicUrl = `${publicBaseUrl.replace(/\/$/, '')}/${key}`;
+    } else if (endpoint) {
+      publicUrl = `${endpoint}/${this.bucket}/${key}`;
+    } else {
+      publicUrl = `https://${this.bucket}.s3.${this.config.get('AWS_REGION', 'us-east-1')}.amazonaws.com/${key}`;
+    }
+
+    return { publicUrl, key };
+  }
 }

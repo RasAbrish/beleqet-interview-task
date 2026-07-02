@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
@@ -15,11 +15,18 @@ const schema = z.object({
 
 export default function LoginForm() {
   const router = useRouter();
-  const { setUser } = useAuth();
+  const { user, ready, setUser } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Redirect already-authenticated users away from login
+  useEffect(() => {
+    if (ready && user) router.replace("/");
+  }, [ready, user, router]);
+
+  if (ready && user) return null;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
