@@ -6,6 +6,8 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { PrismaService } from './prisma/prisma.service';
+import * as bcrypt from 'bcryptjs';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -14,6 +16,26 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT', 4000);
   const nodeEnv = configService.get<string>('NODE_ENV', 'development');
+
+  const adminEmail = configService.get<string>('ADMIN_EMAIL')?.toLowerCase().trim();
+  const adminPassword = configService.get<string>('ADMIN_PASSWORD');
+  if (adminEmail && adminPassword) {
+    if (adminPassword.length < 12) throw new Error('ADMIN_PASSWORD must contain at least 12 characters');
+    const prisma = app.get(PrismaService);
+    await prisma.user.upsert({
+      where: { email: adminEmail },
+      update: { role: 'ADMIN', isActive: true },
+      create: {
+        email: adminEmail,
+        passwordHash: await bcrypt.hash(adminPassword, 12),
+        firstName: configService.get<string>('ADMIN_FIRST_NAME', 'Platform'),
+        lastName: configService.get<string>('ADMIN_LAST_NAME', 'Admin'),
+        role: 'ADMIN',
+        emailVerified: true,
+      },
+    });
+    logger.log(`Admin account ensured: ${adminEmail}`);
+  }
 
   // ── Security ──────────────────────────────────────────────────────────────
   app.use(helmet());
