@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/components/AuthProvider";
+import ChatWidget from "@/components/ChatWidget";
 
 // Using Inter via next/font/google requires network access to Google Fonts at
 // build time. If your deployment environment can reach fonts.googleapis.com,
@@ -29,6 +30,7 @@ export default function RootLayout({
           <Header />
           <main>{children}</main>
           <Footer />
+          <ChatWidget />
         </AuthProvider>
       </body>
     </html>

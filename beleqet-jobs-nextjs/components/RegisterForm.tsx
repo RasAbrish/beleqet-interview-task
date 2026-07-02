@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { User, Mail, Lock, Loader2 } from "lucide-react";
+import { User, Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 import { registerUser, type RegisterInput } from "@/lib/auth";
 import { useAuth } from "@/components/AuthProvider";
@@ -32,6 +32,7 @@ export default function RegisterForm() {
     password: "",
     role: "JOB_SEEKER",
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -109,13 +110,21 @@ export default function RegisterForm() {
         <div className="flex items-center gap-2 rounded-xl border border-border bg-white px-3 py-2.5 focus-within:border-brandGreen">
           <Lock className="h-4 w-4 text-muted shrink-0" />
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             autoComplete="new-password"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             placeholder="At least 8 characters"
             className="w-full text-sm text-ink placeholder:text-muted outline-none"
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            className="text-muted hover:text-ink transition-colors"
+          >
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
         </div>
       </div>
 
