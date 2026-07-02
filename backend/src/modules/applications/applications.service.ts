@@ -1,6 +1,4 @@
-import {
-  Injectable, NotFoundException, ConflictException, Logger,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -47,11 +45,14 @@ export class ApplicationsService {
           userId,
           coverLetter: dto.coverLetter,
           resumeUrl: dto.resumeUrl,
+          portfolioUrl: dto.portfolioUrl,
+          expectedSalary: dto.expectedSalary,
+          screeningAnswers: dto.screeningAnswers,
           status: 'SUBMITTED',
         },
         include: {
           user: { select: { id: true, firstName: true, lastName: true, email: true } },
-          job:  { select: { id: true, title: true, companyId: true } },
+          job: { select: { id: true, title: true, companyId: true } },
         },
       });
 
@@ -75,38 +76,41 @@ export class ApplicationsService {
     });
 
     // Fire-and-forget: do not await Redis queues so the UI doesn't hang if Redis is down locally.
-    this.applicationQueue.add(
-      APPLICATION_JOBS.SCREEN_CANDIDATE,
-      {
-        applicationId: application.id,
-        userId,
-        jobId: dto.jobId,
-        jobTitle: job.title,
-        jobDescription: job.description,
-        jobRequirements: job.requirements,
-        coverLetter: dto.coverLetter,
-        resumeUrl: dto.resumeUrl,
-        companyId: job.companyId,
-      },
-      { priority: 1 },
-    ).catch(err => this.logger.error('Failed to enqueue SCREEN_CANDIDATE', err.message));
+    this.applicationQueue
+      .add(
+        APPLICATION_JOBS.SCREEN_CANDIDATE,
+        {
+          applicationId: application.id,
+          userId,
+          jobId: dto.jobId,
+          jobTitle: job.title,
+          jobDescription: job.description,
+          jobRequirements: job.requirements,
+          coverLetter: dto.coverLetter,
+          resumeUrl: dto.resumeUrl,
+          companyId: job.companyId,
+        },
+        { priority: 1 },
+      )
+      .catch((err) => this.logger.error('Failed to enqueue SCREEN_CANDIDATE', err.message));
 
-    this.applicationQueue.add(
-      APPLICATION_JOBS.NOTIFY_RECRUITER,
-      {
-        applicationId: application.id,
-        jobId: dto.jobId,
-        jobTitle: job.title,
-        companyId: job.companyId,
-        applicantName: `${application.user.firstName} ${application.user.lastName}`,
-      },
-      { priority: 2 },
-    ).catch(err => this.logger.error('Failed to enqueue NOTIFY_RECRUITER', err.message));
+    this.applicationQueue
+      .add(
+        APPLICATION_JOBS.NOTIFY_RECRUITER,
+        {
+          applicationId: application.id,
+          jobId: dto.jobId,
+          jobTitle: job.title,
+          companyId: job.companyId,
+          applicantName: `${application.user.firstName} ${application.user.lastName}`,
+        },
+        { priority: 2 },
+      )
+      .catch((err) => this.logger.error('Failed to enqueue NOTIFY_RECRUITER', err.message));
 
-    this.analyticsQueue.add(
-      ANALYTICS_JOBS.UPDATE_JOB_STATS,
-      { jobId: dto.jobId }
-    ).catch(err => this.logger.error('Failed to enqueue UPDATE_JOB_STATS', err.message));
+    this.analyticsQueue
+      .add(ANALYTICS_JOBS.UPDATE_JOB_STATS, { jobId: dto.jobId })
+      .catch((err) => this.logger.error('Failed to enqueue UPDATE_JOB_STATS', err.message));
 
     this.eventEmitter.emit('application.submitted', {
       applicationId: application.id,
@@ -158,13 +162,34 @@ export class ApplicationsService {
     });
 
     if (!application) {
-      throw new NotFoundException(`Application ${id} not found or you don't have permission to update it`);
+      throw new NotFoundException(
+        `Application ${id} not found or you don't have permission to update it`,
+      );
     }
 
     // 2. Update the status
-    return this.prisma.application.update({
+    const updated = await this.prisma.application.update({
       where: { id },
       data: { status: status as never },
     });
+    await this.prisma.notification.create({
+      data: {
+        userId: application.userId,
+        channel: 'IN_APP',
+        type: 'APPLICATION_STATUS',
+        title: 'Application status updated',
+        body: `Your application status is now ${status.replaceAll('_', ' ').toLowerCase()}.`,
+        metadata: { applicationId: id },
+      },
+    });
+    return updated;
+  }
+
+  async withdraw(id: string, userId: string) {
+    const application = await this.prisma.application.findFirst({
+      where: { id, userId, status: { in: ['SUBMITTED', 'SCREENING', 'SHORTLISTED'] } },
+    });
+    if (!application) throw new NotFoundException('Application cannot be withdrawn');
+    return this.prisma.application.update({ where: { id }, data: { status: 'WITHDRAWN' } });
   }
 }

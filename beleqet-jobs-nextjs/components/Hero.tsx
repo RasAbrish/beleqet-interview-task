@@ -2,8 +2,15 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Image from "next/image";
-import { Search, MapPin, ShieldCheck, BellRing, Send } from "lucide-react";
+import Link from "next/link";
+import {
+  ArrowRight,
+  CheckCircle2,
+  MapPin,
+  Search,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
 import { popularSearches } from "@/lib/mockData";
 
 export default function Hero() {
@@ -14,114 +21,181 @@ export default function Hero() {
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     const params = new URLSearchParams();
-    if (query) params.set("q", query);
-    if (location) params.set("loc", location);
+    if (query.trim()) params.set("q", query.trim());
+    if (location.trim()) params.set("loc", location.trim());
     router.push(`/jobs?${params.toString()}`);
   }
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary2 to-darkGreen text-white">
-      <div className="pointer-events-none absolute inset-0 opacity-30 [background-image:radial-gradient(circle_at_20%_20%,rgba(34,197,94,0.25),transparent_40%),radial-gradient(circle_at_85%_75%,rgba(56,189,248,0.18),transparent_45%)]" />
-
-      <div className="container-page relative py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center">
-        <div>
-          <h1 className="text-hero">
-            Find Your Next <span className="text-success">Opportunity</span> Faster.
+    <section className="hero-grid relative overflow-hidden bg-[#fffdf8]">
+      <div className="container-page relative grid min-h-[690px] items-center gap-14 py-16 lg:grid-cols-[1.08fr_.92fr] lg:py-20">
+        <div className="relative z-10">
+          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-brandGreen/20 bg-brandGreen/5 px-3.5 py-2 text-xs font-bold text-brandGreen">
+            <Sparkles className="h-3.5 w-3.5" /> Ethiopia’s career marketplace
+          </div>
+          <h1 className="max-w-3xl text-[clamp(3rem,7vw,6.7rem)] font-black leading-[.88] tracking-[-0.065em] text-primary">
+            Work that
+            <br />
+            moves you{" "}
+            <span className="relative whitespace-nowrap text-brandGreen">
+              forward
+              <span className="absolute -bottom-1 left-1 h-2 w-[96%] -rotate-1 rounded-full bg-[#d8ff3e] -z-10" />
+            </span>
+            .
           </h1>
-          <p className="mt-5 text-white/70 max-w-md text-base leading-relaxed">
-            Discover thousands of verified job opportunities across Ethiopia. Search, apply, and get hired faster with
-            the Beleqet Vacancy Platform.
+          <p className="mt-7 max-w-xl text-base leading-7 text-muted md:text-lg">
+            Find meaningful roles from verified Ethiopian employers, build a
+            standout profile, and take your next career step with confidence.
           </p>
 
           <form
             onSubmit={handleSearch}
-            className="mt-8 bg-white rounded-2xl p-2 flex flex-col sm:flex-row gap-2 shadow-cardHover"
+            className="mt-9 grid max-w-3xl gap-2 rounded-[22px] border border-primary/10 bg-white p-2.5 shadow-[0_20px_70px_rgba(4,22,3,.12)] sm:grid-cols-[1fr_1fr_auto]"
           >
-            <div className="flex items-center flex-1 gap-2 px-3 py-2 rounded-xl">
-              <Search className="h-4 w-4 text-muted shrink-0" />
+            <label className="flex items-center gap-3 rounded-2xl px-3 py-3">
+              <Search className="h-5 w-5 shrink-0 text-brandGreen" />
+              <span className="sr-only">Job title or keyword</span>
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Job title, keyword or company"
-                className="w-full text-sm text-ink placeholder:text-muted outline-none"
+                placeholder="Job title or skill"
+                className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-muted/70"
               />
-            </div>
-            <div className="hidden sm:block w-px bg-border my-1" />
-            <div className="flex items-center flex-1 gap-2 px-3 py-2 rounded-xl">
-              <MapPin className="h-4 w-4 text-muted shrink-0" />
+            </label>
+            <label className="flex items-center gap-3 rounded-2xl border-t border-border px-3 py-3 sm:border-l sm:border-t-0">
+              <MapPin className="h-5 w-5 shrink-0 text-brandGreen" />
+              <span className="sr-only">Location</span>
               <input
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="Location e.g. Addis Ababa"
-                className="w-full text-sm text-ink placeholder:text-muted outline-none"
+                placeholder="Addis Ababa or remote"
+                className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-muted/70"
               />
-            </div>
+            </label>
             <button
               type="submit"
-              className="shrink-0 inline-flex items-center justify-center rounded-xl bg-brandGreen px-6 py-3 text-sm font-semibold text-white hover:bg-darkGreen transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3.5 text-sm font-bold text-white transition hover:bg-brandGreen"
             >
-              Search Jobs
+              Search jobs <ArrowRight className="h-4 w-4" />
             </button>
           </form>
 
-          <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-white/60">
-            <span>Popular Searches:</span>
-            {popularSearches.map((term) => (
+          <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-muted">
+            <span className="font-semibold text-ink">Trending:</span>
+            {popularSearches.slice(0, 4).map((term) => (
               <button
                 key={term}
-                onClick={() => router.push(`/jobs?q=${encodeURIComponent(term)}`)}
-                className="rounded-full border border-white/15 px-3 py-1 hover:bg-white/10 transition-colors"
+                onClick={() =>
+                  router.push(`/jobs?q=${encodeURIComponent(term)}`)
+                }
+                className="rounded-full border border-primary/10 bg-white px-3 py-1.5 transition hover:border-brandGreen hover:text-brandGreen"
               >
                 {term}
               </button>
             ))}
           </div>
-
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="flex items-center gap-2.5 rounded-xl bg-white/5 border border-white/10 px-3 py-3">
-              <ShieldCheck className="h-4 w-4 text-success shrink-0" />
-              <div className="text-xs leading-tight">
-                <p className="font-semibold">Verified & Trusted</p>
-                <p className="text-white/50">100% verified job listings</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2.5 rounded-xl bg-white/5 border border-white/10 px-3 py-3">
-              <BellRing className="h-4 w-4 text-cyanAccent shrink-0" />
-              <div className="text-xs leading-tight">
-                <p className="font-semibold">Real-time Alerts</p>
-                <p className="text-white/50">Get instant job updates</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2.5 rounded-xl bg-white/5 border border-white/10 px-3 py-3">
-              <Send className="h-4 w-4 text-cyanAccent shrink-0" />
-              <div className="text-xs leading-tight">
-                <p className="font-semibold">Telegram Notifications</p>
-                <p className="text-white/50">Never miss an opportunity</p>
-              </div>
-            </div>
-          </div>
         </div>
 
-        <div className="relative hidden md:block">
-          <div className="relative aspect-[4/5] rounded-3xl overflow-hidden border border-white/10 shadow-cardHover">
-            <Image
-              src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1000&q=80"
-              alt="A professional hired through Beleqet Jobs"
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 40vw"
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-primary/50 to-transparent" />
+        <div className="relative mx-auto hidden w-full max-w-[520px] lg:block">
+          <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[#d8ff3e]/60 blur-2xl" />
+          <div className="relative rotate-2 rounded-[36px] bg-primary p-6 shadow-[0_35px_80px_rgba(4,22,3,.2)]">
+            <div className="flex items-center justify-between border-b border-white/10 pb-5">
+              <div>
+                <p className="text-xs font-semibold text-white/50">
+                  RECOMMENDED FOR YOU
+                </p>
+                <p className="mt-1 text-xl font-bold text-white">
+                  Fresh opportunities
+                </p>
+              </div>
+              <span className="rounded-full bg-[#d8ff3e] px-3 py-1 text-xs font-extrabold text-primary">
+                24 new
+              </span>
+            </div>
+            <div className="mt-5 space-y-3">
+              <Opportunity
+                title="Senior Product Designer"
+                company="Kifiya Financial Technology"
+                meta="Addis Ababa · Hybrid"
+                tone="bg-[#d8ff3e]"
+                initials="KF"
+              />
+              <Opportunity
+                title="Frontend Engineer"
+                company="PRAGMA Investment"
+                meta="Remote · Full time"
+                tone="bg-[#ffbc80]"
+                initials="PI"
+              />
+              <Opportunity
+                title="Marketing Lead"
+                company="Dodai Manufacturing"
+                meta="Addis Ababa · Full time"
+                tone="bg-[#b8e5ff]"
+                initials="DM"
+              />
+            </div>
+            <Link
+              href="/jobs"
+              className="mt-5 flex items-center justify-center gap-2 rounded-2xl border border-white/15 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+            >
+              Explore all openings <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
-          <div className="absolute top-6 -left-6 rounded-xl bg-white text-ink px-4 py-3 shadow-cardHover text-xs w-44">
-            <p className="font-semibold flex items-center gap-1.5">
-              <Send className="h-3.5 w-3.5 text-cyanAccent" /> New Job Alert!
-            </p>
-            <p className="text-muted mt-0.5">UI/UX Designer · Addis Ababa</p>
+          <div className="absolute -bottom-10 -left-16 -rotate-3 rounded-2xl border border-primary/10 bg-white p-4 shadow-xl">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brandGreen/10 text-brandGreen">
+                <TrendingUp className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-lg font-black text-primary">3.2×</p>
+                <p className="text-xs text-muted">more profile views</p>
+              </div>
+            </div>
+          </div>
+          <div className="absolute -right-8 top-24 rotate-6 rounded-2xl bg-white p-3 shadow-xl">
+            <div className="flex items-center gap-2 text-xs font-bold text-primary">
+              <CheckCircle2 className="h-5 w-5 text-brandGreen" /> Verified
+              employers
+            </div>
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function Opportunity({
+  title,
+  company,
+  meta,
+  tone,
+  initials,
+}: {
+  title: string;
+  company: string;
+  meta: string;
+  tone: string;
+  initials: string;
+}) {
+  return (
+    <div className="rounded-[20px] bg-white p-4">
+      <div className="flex gap-3">
+        <span
+          className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xs font-black text-primary ${tone}`}
+        >
+          {initials}
+        </span>
+        <div className="min-w-0">
+          <h3 className="truncate text-sm font-extrabold text-primary">
+            {title}
+          </h3>
+          <p className="mt-0.5 truncate text-xs text-muted">{company}</p>
+          <p className="mt-2 text-[11px] font-semibold text-brandGreen">
+            {meta}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }

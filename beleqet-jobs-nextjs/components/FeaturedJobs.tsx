@@ -6,15 +6,24 @@ export default function FeaturedJobs({ jobs }: { jobs: Job[] }) {
   if (!jobs.length) return null;
 
   return (
-    <section className="bg-white border-y border-border">
-      <div className="container-page py-14">
-        <div className="flex items-end justify-between mb-6">
+    <section className="bg-primary text-white">
+      <div className="container-page py-20">
+        <div className="mb-10 flex items-end justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-brandGreen mb-2">Opportunities</p>
-            <h2 className="text-sectionH2">Featured Jobs</h2>
-            <p className="text-muted text-sm mt-1">Fresh opportunities from companies hiring right now.</p>
+            <p className="mb-3 text-xs font-extrabold uppercase tracking-[.2em] text-[#d8ff3e]">
+              Now hiring
+            </p>
+            <h2 className="text-sectionH2 tracking-tight">
+              Your next role could be here.
+            </h2>
+            <p className="mt-2 text-sm text-white/55">
+              Fresh opportunities from teams building Ethiopia’s future.
+            </p>
           </div>
-          <Link href="/jobs" className="hidden sm:inline-block text-sm font-semibold text-brandGreen hover:underline shrink-0">
+          <Link
+            href="/jobs"
+            className="hidden shrink-0 text-sm font-bold text-[#d8ff3e] hover:underline sm:inline-block"
+          >
             View all jobs →
           </Link>
         </div>

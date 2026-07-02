@@ -40,8 +40,13 @@ export class ApplicationsController {
   updateStatus(
     @Param('id') id: string,
     @Body() dto: UpdateApplicationStatusDto,
-    @CurrentUser() user: CurrentUserPayload
+    @CurrentUser() user: CurrentUserPayload,
   ) {
     return this.svc.updateStatus(id, dto.status, user.userId);
+  }
+
+  @Patch(':id/withdraw')
+  withdraw(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
+    return this.svc.withdraw(id, user.userId);
   }
 }

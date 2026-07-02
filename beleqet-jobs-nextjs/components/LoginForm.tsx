@@ -33,7 +33,8 @@ export default function LoginForm() {
     try {
       const user = await loginUser(parsed.data);
       setUser(user);
-      router.push("/");
+      const next = new URLSearchParams(window.location.search).get("next");
+      router.push(next?.startsWith("/") ? next : "/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -50,7 +51,9 @@ export default function LoginForm() {
       )}
 
       <div>
-        <label className="block text-sm font-medium text-ink mb-1.5">Email</label>
+        <label className="block text-sm font-medium text-ink mb-1.5">
+          Email
+        </label>
         <div className="flex items-center gap-2 rounded-xl border border-border bg-white px-3 py-2.5 focus-within:border-brandGreen">
           <Mail className="h-4 w-4 text-muted shrink-0" />
           <input
@@ -65,7 +68,9 @@ export default function LoginForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-ink mb-1.5">Password</label>
+        <label className="block text-sm font-medium text-ink mb-1.5">
+          Password
+        </label>
         <div className="flex items-center gap-2 rounded-xl border border-border bg-white px-3 py-2.5 focus-within:border-brandGreen">
           <Lock className="h-4 w-4 text-muted shrink-0" />
           <input
@@ -82,7 +87,11 @@ export default function LoginForm() {
             aria-label={showPassword ? "Hide password" : "Show password"}
             className="text-muted hover:text-ink transition-colors"
           >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
           </button>
         </div>
       </div>
@@ -98,7 +107,10 @@ export default function LoginForm() {
 
       <p className="text-sm text-muted text-center">
         Don’t have an account?{" "}
-        <Link href="/register" className="font-semibold text-brandGreen hover:underline">
+        <Link
+          href="/register"
+          className="font-semibold text-brandGreen hover:underline"
+        >
           Create one
         </Link>
       </p>

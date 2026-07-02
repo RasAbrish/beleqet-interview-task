@@ -1,4 +1,10 @@
-import { Briefcase, Building2, Users, Smile, type LucideIcon } from "lucide-react";
+import {
+  Briefcase,
+  Building2,
+  Users,
+  Smile,
+  type LucideIcon,
+} from "lucide-react";
 import { stats } from "@/lib/mockData";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -10,23 +16,30 @@ const iconMap: Record<string, LucideIcon> = {
 
 export default function StatsBar() {
   return (
-    <div className="container-page -mt-8 relative z-10">
-      <div className="rounded-2xl bg-white border border-border shadow-card grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border">
+    <section className="border-y border-primary/10 bg-[#d8ff3e]">
+      <div className="container-page grid grid-cols-2 sm:grid-cols-4">
         {stats.map((stat) => {
           const Icon = iconMap[stat.icon] ?? Briefcase;
           return (
-            <div key={stat.label} className="flex items-center gap-3.5 px-5 py-6">
-              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brandGreen/10 text-brandGreen">
+            <div
+              key={stat.label}
+              className="flex items-center gap-3.5 border-primary/10 px-3 py-7 even:border-l sm:border-l sm:px-6 first:sm:border-l-0"
+            >
+              <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-[#d8ff3e] lg:inline-flex">
                 <Icon className="h-5 w-5" />
               </span>
               <div>
-                <p className="text-xl font-extrabold text-ink leading-none">{stat.value}</p>
-                <p className="text-[11px] text-muted mt-1.5">{stat.label}</p>
+                <p className="text-2xl font-black leading-none tracking-tight text-primary">
+                  {stat.value}
+                </p>
+                <p className="mt-1.5 text-[11px] font-bold uppercase tracking-wider text-primary/60">
+                  {stat.label}
+                </p>
               </div>
             </div>
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }

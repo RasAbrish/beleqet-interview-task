@@ -3,10 +3,18 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Mail, MapPin, Briefcase, FileText, Search, ShieldCheck, BadgeCheck } from "lucide-react";
+import {
+  Mail,
+  MapPin,
+  Briefcase,
+  FileText,
+  Search,
+  ShieldCheck,
+  BadgeCheck,
+} from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { roleMeta } from "@/components/HeaderAuth";
-import { getToken } from "@/lib/auth";
+import { authenticatedFetch } from "@/lib/auth";
 
 type Profile = {
   headline?: string | null;
@@ -15,14 +23,17 @@ type Profile = {
   skills?: string[] | null;
 };
 
-const quickActionsByRole: Record<string, { label: string; href: string; icon: typeof Briefcase }[]> = {
+const quickActionsByRole: Record<
+  string,
+  { label: string; href: string; icon: typeof Briefcase }[]
+> = {
   JOB_SEEKER: [
     { label: "Find Jobs", href: "/jobs", icon: Search },
-    { label: "My Applications", href: "/jobs", icon: FileText },
+    { label: "My Applications", href: "/applications", icon: FileText },
   ],
   EMPLOYER: [
     { label: "Post a Job", href: "/post-job", icon: Briefcase },
-    { label: "Browse Jobs", href: "/jobs", icon: Search },
+    { label: "Hiring Dashboard", href: "/employer", icon: FileText },
   ],
   FREELANCER: [
     { label: "Find Gigs", href: "/jobs", icon: Search },
@@ -44,22 +55,29 @@ export default function ProfilePage() {
   }, [ready, user, router]);
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) return;
-    const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
-    fetch(`${base}/users/profile`, { headers: { Authorization: `Bearer ${token}` } })
+    const base =
+      process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+    authenticatedFetch(`${base}/users/profile`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => data && setProfile(data))
       .catch(() => {});
   }, []);
 
   if (!ready || !user) {
-    return <div className="container-page py-24 text-center text-muted">Loading your profile…</div>;
+    return (
+      <div className="container-page py-24 text-center text-muted">
+        Loading your profile…
+      </div>
+    );
   }
 
   const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
-  const role = roleMeta[user.role] ?? { label: user.role, className: "bg-muted/10 text-muted" };
-  const actions = quickActionsByRole[user.role] ?? quickActionsByRole.JOB_SEEKER;
+  const role = roleMeta[user.role] ?? {
+    label: user.role,
+    className: "bg-muted/10 text-muted",
+  };
+  const actions =
+    quickActionsByRole[user.role] ?? quickActionsByRole.JOB_SEEKER;
 
   return (
     <div className="container-page py-10">
@@ -75,7 +93,9 @@ export default function ProfilePage() {
                 <h1 className="text-xl font-extrabold text-ink">
                   {user.firstName} {user.lastName}
                 </h1>
-                <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${role.className}`}>
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${role.className}`}
+                >
                   <BadgeCheck className="h-3.5 w-3.5" /> {role.label}
                 </span>
               </div>
@@ -99,7 +119,9 @@ export default function ProfilePage() {
             </span>
             <div>
               <p className="text-sm font-semibold text-ink">{a.label}</p>
-              <p className="text-xs text-muted">Go to {a.label.toLowerCase()}</p>
+              <p className="text-xs text-muted">
+                Go to {a.label.toLowerCase()}
+              </p>
             </div>
           </Link>
         ))}
@@ -108,9 +130,12 @@ export default function ProfilePage() {
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 rounded-2xl border border-border bg-white p-6">
           <h2 className="text-sm font-semibold text-ink">About</h2>
-          {profile?.headline && <p className="mt-3 font-medium text-ink">{profile.headline}</p>}
+          {profile?.headline && (
+            <p className="mt-3 font-medium text-ink">{profile.headline}</p>
+          )}
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            {profile?.bio || "You haven’t added a bio yet. A short summary helps employers get to know you."}
+            {profile?.bio ||
+              "You haven’t added a bio yet. A short summary helps employers get to know you."}
           </p>
           {profile?.location && (
             <p className="mt-4 flex items-center gap-1.5 text-sm text-muted">
@@ -120,7 +145,10 @@ export default function ProfilePage() {
           {profile?.skills && profile.skills.length > 0 && (
             <div className="mt-5 flex flex-wrap gap-2">
               {profile.skills.map((s) => (
-                <span key={s} className="rounded-full border border-border bg-pageBg px-3 py-1 text-xs font-medium text-muted">
+                <span
+                  key={s}
+                  className="rounded-full border border-border bg-pageBg px-3 py-1 text-xs font-medium text-muted"
+                >
                   {s}
                 </span>
               ))}
@@ -133,7 +161,9 @@ export default function ProfilePage() {
           <dl className="mt-4 space-y-3 text-sm">
             <div className="flex items-center justify-between">
               <dt className="text-muted">Full name</dt>
-              <dd className="font-medium text-ink">{user.firstName} {user.lastName}</dd>
+              <dd className="font-medium text-ink">
+                {user.firstName} {user.lastName}
+              </dd>
             </div>
             <div className="flex items-center justify-between">
               <dt className="text-muted">Account type</dt>

@@ -40,8 +40,9 @@ export class NotificationsProcessor {
       port: this.config.get<number>('SMTP_PORT'),
       auth: {
         user: this.config.get<string>('SMTP_USER'),
-        pass: this.config.get<string>('SMTP_PASS'),
+        pass: this.config.get<string>('SMTP_PASSWORD') ?? this.config.get<string>('SMTP_PASS'),
       },
+      secure: this.config.get<string>('SMTP_SECURE', 'false') === 'true',
     });
   }
 
@@ -67,18 +68,15 @@ export class NotificationsProcessor {
     const botToken = this.config.get<string>('TELEGRAM_BOT_TOKEN');
     if (!botToken) return;
     try {
-      await fetch(
-        `https://api.telegram.org/bot${botToken}/sendMessage`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: job.data.telegramId,
-            text: job.data.message,
-            parse_mode: 'Markdown',
-          }),
-        },
-      );
+      await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: job.data.telegramId,
+          text: job.data.message,
+          parse_mode: 'Markdown',
+        }),
+      });
       this.logger.debug(`Telegram → ${job.data.telegramId}`);
     } catch (e) {
       this.logger.warn(`Telegram failed: ${(e as Error).message}`);
@@ -89,10 +87,12 @@ export class NotificationsProcessor {
   async sendEmail(job: Job<EmailPayload>) {
     const { to, subject, html } = job.data;
     if (!to) return;
-    
+
     try {
       await this.transporter.sendMail({
-        from: this.config.get<string>('EMAIL_FROM', 'Beleqet <noreply@beleqet.com>'),
+        from:
+          this.config.get<string>('SMTP_FROM') ??
+          this.config.get<string>('EMAIL_FROM', 'Beleqet <noreply@beleqet.com>'),
         to,
         subject,
         html,

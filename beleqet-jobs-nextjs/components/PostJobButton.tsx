@@ -14,7 +14,7 @@ export default function PostJobButton() {
   return (
     <Link
       href="/post-job"
-      className="inline-flex items-center gap-1.5 rounded-full bg-brandGreen px-4 py-2 text-sm font-semibold text-white hover:bg-darkGreen transition-colors"
+      className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brandGreen"
     >
       <Plus className="h-4 w-4" /> Post a Job
     </Link>

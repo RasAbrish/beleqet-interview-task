@@ -1,56 +1,78 @@
-import { ShieldCheck, Zap, BellRing, Send, Smartphone } from "lucide-react";
+import Link from "next/link";
+import {
+  ArrowUpRight,
+  BellRing,
+  ShieldCheck,
+  WandSparkles,
+} from "lucide-react";
 
 const features = [
   {
     icon: ShieldCheck,
-    title: "Trusted Platform",
-    desc: "All jobs are verified for your security.",
+    number: "01",
+    title: "Roles you can trust",
+    desc: "We review listings and employers so you spend time on real opportunities.",
   },
   {
-    icon: Zap,
-    title: "Fast & Easy",
-    desc: "Search and apply in just a few clicks.",
+    icon: WandSparkles,
+    number: "02",
+    title: "A profile that works",
+    desc: "Show employers your skills, experience, and potential in one clear place.",
   },
   {
     icon: BellRing,
-    title: "Real-time Updates",
-    desc: "Get instant alerts every step.",
-  },
-  {
-    icon: Send,
-    title: "Telegram Alerts",
-    desc: "Get instant job alerts on Telegram.",
+    number: "03",
+    title: "The right alert, on time",
+    desc: "Get relevant openings through the channels you already use, including Telegram.",
   },
 ];
 
 export default function WhyChoose() {
   return (
-    <section className="container-page py-14">
-      <h2 className="text-sectionH2 mb-8">Why Choose Beleqet?</h2>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {features.map((f) => (
-          <div key={f.title} className="rounded-xl border border-border bg-white p-5">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-brandGreen/10 text-brandGreen mb-3">
-              <f.icon className="h-4.5 w-4.5" />
-            </span>
-            <h3 className="text-sm font-semibold text-ink">{f.title}</h3>
-            <p className="text-xs text-muted mt-1">{f.desc}</p>
-          </div>
-        ))}
-
-        <div className="rounded-xl bg-primary text-white p-5 flex flex-col justify-between">
-          <div>
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 mb-3">
-              <Smartphone className="h-4.5 w-4.5" />
-            </span>
-            <h3 className="text-sm font-semibold">Search on the go!</h3>
-            <p className="text-xs text-white/60 mt-1">Access thousands of jobs anytime, anywhere.</p>
-          </div>
-          <div className="flex flex-col gap-1.5 mt-4 text-[11px]">
-            <span className="rounded-md bg-white/10 px-2.5 py-1.5 text-center">▶ Google Play</span>
-            <span className="rounded-md bg-white/10 px-2.5 py-1.5 text-center"> App Store</span>
-          </div>
+    <section className="container-page py-20 lg:py-24">
+      <div className="grid gap-12 lg:grid-cols-[.8fr_1.2fr]">
+        <div>
+          <p className="mb-3 text-xs font-extrabold uppercase tracking-[.2em] text-brandGreen">
+            Built around your journey
+          </p>
+          <h2 className="max-w-md text-[clamp(2.25rem,4vw,4rem)] font-black leading-[.98] tracking-[-.05em] text-primary">
+            Less searching.
+            <br />
+            More progress.
+          </h2>
+          <p className="mt-5 max-w-sm text-sm leading-6 text-muted">
+            Beleqet removes the noise between discovering an opportunity and
+            making your move.
+          </p>
+          <Link
+            href="/register"
+            className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brandGreen"
+          >
+            Create your profile <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <div className="divide-y divide-primary/10 border-y border-primary/10">
+          {features.map((feature) => (
+            <div
+              key={feature.title}
+              className="group grid grid-cols-[auto_1fr] gap-5 py-7 sm:grid-cols-[auto_1fr_auto] sm:items-center"
+            >
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-primary/10 bg-white text-brandGreen">
+                <feature.icon className="h-5 w-5" />
+              </span>
+              <div>
+                <h3 className="text-lg font-extrabold text-primary">
+                  {feature.title}
+                </h3>
+                <p className="mt-1 max-w-lg text-sm leading-6 text-muted">
+                  {feature.desc}
+                </p>
+              </div>
+              <span className="hidden text-4xl font-black text-primary/10 sm:block">
+                {feature.number}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </section>

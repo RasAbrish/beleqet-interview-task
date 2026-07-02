@@ -3,13 +3,28 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { LogOut, User, Briefcase, ChevronDown } from "lucide-react";
+import {
+  LogOut,
+  User,
+  Briefcase,
+  ChevronDown,
+  ShieldCheck,
+} from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 
 export const roleMeta: Record<string, { label: string; className: string }> = {
-  JOB_SEEKER: { label: "Job Seeker", className: "bg-brandGreen/10 text-brandGreen" },
-  EMPLOYER: { label: "Employer", className: "bg-cyanAccent/10 text-cyanAccent" },
-  FREELANCER: { label: "Freelancer", className: "bg-purpleAccent/10 text-purpleAccent" },
+  JOB_SEEKER: {
+    label: "Job Seeker",
+    className: "bg-brandGreen/10 text-brandGreen",
+  },
+  EMPLOYER: {
+    label: "Employer",
+    className: "bg-cyanAccent/10 text-cyanAccent",
+  },
+  FREELANCER: {
+    label: "Freelancer",
+    className: "bg-purpleAccent/10 text-purpleAccent",
+  },
   ADMIN: { label: "Admin", className: "bg-orangeAccent/10 text-orangeAccent" },
 };
 
@@ -21,26 +36,28 @@ export default function HeaderAuth() {
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
     }
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
-  if (!ready) return <div className="h-9 w-9 rounded-full bg-pageBg animate-pulse" />;
+  if (!ready)
+    return <div className="h-9 w-9 rounded-full bg-pageBg animate-pulse" />;
 
   if (!user) {
     return (
       <div className="flex items-center gap-1.5">
         <Link
           href="/login"
-          className="hidden sm:inline-block rounded-full px-3.5 py-2 text-sm font-medium text-ink hover:text-brandGreen transition-colors"
+          className="inline-block rounded-full px-3.5 py-2 text-sm font-medium text-ink transition-colors hover:text-brandGreen"
         >
           Login
         </Link>
         <Link
           href="/register"
-          className="hidden sm:inline-block rounded-full border border-border px-3.5 py-2 text-sm font-semibold text-ink hover:border-brandGreen hover:text-brandGreen transition-colors"
+          className="inline-block rounded-full border border-border px-3.5 py-2 text-sm font-semibold text-ink transition-colors hover:border-brandGreen hover:text-brandGreen"
         >
           Sign Up
         </Link>
@@ -49,7 +66,10 @@ export default function HeaderAuth() {
   }
 
   const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
-  const role = roleMeta[user.role] ?? { label: user.role, className: "bg-muted/10 text-muted" };
+  const role = roleMeta[user.role] ?? {
+    label: user.role,
+    className: "bg-muted/10 text-muted",
+  };
 
   return (
     <div className="relative" ref={ref}>
@@ -60,8 +80,12 @@ export default function HeaderAuth() {
         <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-brandGreen to-darkGreen text-white text-xs font-bold uppercase">
           {initials}
         </span>
-        <span className="hidden sm:block max-w-[7rem] truncate text-sm font-medium text-ink">{user.firstName}</span>
-        <ChevronDown className={`h-4 w-4 text-muted transition-transform ${open ? "rotate-180" : ""}`} />
+        <span className="hidden sm:block max-w-[7rem] truncate text-sm font-medium text-ink">
+          {user.firstName}
+        </span>
+        <ChevronDown
+          className={`h-4 w-4 text-muted transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
 
       {open && (
@@ -78,17 +102,46 @@ export default function HeaderAuth() {
                 <p className="truncate text-xs text-muted">{user.email}</p>
               </div>
             </div>
-            <span className={`mt-3 inline-block rounded-full px-2.5 py-1 text-[11px] font-semibold ${role.className}`}>
+            <span
+              className={`mt-3 inline-block rounded-full px-2.5 py-1 text-[11px] font-semibold ${role.className}`}
+            >
               {role.label}
             </span>
           </div>
           <div className="p-1.5">
-            <MenuLink href="/profile" icon={User} onClick={() => setOpen(false)}>
+            <MenuLink
+              href="/profile"
+              icon={User}
+              onClick={() => setOpen(false)}
+            >
               My Profile
             </MenuLink>
-            <MenuLink href="/jobs" icon={Briefcase} onClick={() => setOpen(false)}>
-              Browse Jobs
+            <MenuLink
+              href={
+                user.role === "EMPLOYER"
+                  ? "/employer"
+                  : user.role === "JOB_SEEKER"
+                    ? "/applications"
+                    : "/jobs"
+              }
+              icon={Briefcase}
+              onClick={() => setOpen(false)}
+            >
+              {user.role === "EMPLOYER"
+                ? "Hiring Dashboard"
+                : user.role === "JOB_SEEKER"
+                  ? "My Applications"
+                  : "Browse Jobs"}
             </MenuLink>
+            {user.role === "ADMIN" && (
+              <MenuLink
+                href="/admin"
+                icon={ShieldCheck}
+                onClick={() => setOpen(false)}
+              >
+                Admin Dashboard
+              </MenuLink>
+            )}
             <button
               onClick={() => {
                 logout();

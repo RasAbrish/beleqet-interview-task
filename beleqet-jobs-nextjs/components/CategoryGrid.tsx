@@ -23,36 +23,62 @@ const iconMap: Record<string, LucideIcon> = {
   "more-horizontal": MoreHorizontal,
 };
 
-export default function CategoryGrid({ categories }: { categories: Category[] }) {
+export default function CategoryGrid({
+  categories,
+}: {
+  categories: Category[];
+}) {
   if (!categories.length) return null;
 
   return (
-    <section className="container-page py-14">
-      <div className="flex items-end justify-between mb-6">
+    <section className="container-page py-20">
+      <div className="mb-10 flex items-end justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-brandGreen mb-2">Categories</p>
-          <h2 className="text-sectionH2">Browse Jobs by Category</h2>
-          <p className="text-muted text-sm mt-1">Explore opportunities across growing industries and find jobs that match your skills.</p>
+          <p className="mb-3 text-xs font-extrabold uppercase tracking-[.2em] text-brandGreen">
+            Explore your field
+          </p>
+          <h2 className="text-sectionH2 tracking-tight text-primary">
+            There’s a place for your talent.
+          </h2>
+          <p className="mt-2 text-sm text-muted">
+            Start with an industry and discover where your experience can take
+            you.
+          </p>
         </div>
-        <Link href="/jobs" className="hidden sm:inline-block text-sm font-semibold text-brandGreen hover:underline shrink-0">
+        <Link
+          href="/jobs"
+          className="hidden sm:inline-block text-sm font-semibold text-brandGreen hover:underline shrink-0"
+        >
           View all categories →
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
         {categories.map((cat) => {
           const Icon = iconMap[cat.icon] ?? Briefcase;
           return (
             <Link
               key={cat.id}
               href={`/jobs?category=${cat.id}`}
-              className="flex flex-col items-center text-center gap-2 rounded-xl border border-border bg-white px-3 py-5 hover:border-brandGreen hover:shadow-card hover:-translate-y-0.5 transition-all"
+              className="group flex min-h-40 flex-col justify-between rounded-[22px] border border-primary/10 bg-white p-4 text-left transition-all hover:-translate-y-1 hover:border-primary hover:bg-primary"
             >
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-brandGreen/10 text-brandGreen">
-                <Icon className="h-4.5 w-4.5" />
+              <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#d8ff3e] text-primary">
+                <Icon className="h-5 w-5" />
               </span>
-              <span className="text-xs font-semibold text-ink">{cat.label}</span>
-              {cat.count ? <span className="text-[11px] text-muted">{cat.count} jobs</span> : null}
+              <div>
+                <span className="block text-sm font-extrabold text-primary group-hover:text-white">
+                  {cat.label}
+                </span>
+                {cat.count ? (
+                  <span className="mt-1 block text-[11px] text-muted group-hover:text-white/55">
+                    {cat.count} jobs
+                  </span>
+                ) : (
+                  <span className="mt-1 block text-[11px] text-muted group-hover:text-white/55">
+                    View openings →
+                  </span>
+                )}
+              </div>
             </Link>
           );
         })}
