@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
       console.error("Gemini error", res.status, errText);
       return NextResponse.json({
         reply: "Sorry, I’m having trouble right now. Please try again in a moment.",
-        detail: `Gemini ${res.status} (model: ${model}): ${errText.slice(0, 300)}`,
+        detail: `Gemini ${res.status}: ${errText.slice(0, 200)}`,
       });
     }
 
