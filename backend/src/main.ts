@@ -17,8 +17,18 @@ async function bootstrap() {
 
   // ── Security ──────────────────────────────────────────────────────────────
   app.use(helmet());
+  const allowedOrigins = configService
+    .get<string>('FRONTEND_URL', 'http://localhost:3000')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
   app.enableCors({
-    origin: configService.get<string>('FRONTEND_URL', 'http://localhost:3000'),
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) return cb(null, true);
+      if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin)) return cb(null, true);
+      return cb(null, false);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   });
