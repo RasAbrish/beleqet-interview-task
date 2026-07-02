@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ reply: "Ask me anything about Beleqet Jobs!" });
   }
 
-  const model = process.env.GEMINI_MODEL ?? "gemini-1.5-flash";
+  const model = process.env.GEMINI_MODEL ?? "gemini-2.0-flash";
   const contents = msgs.map((m) => ({
     role: m.role === "assistant" ? "model" : "user",
     parts: [{ text: m.content }],
@@ -61,8 +61,12 @@ export async function POST(req: NextRequest) {
     );
 
     if (!res.ok) {
-      console.error("Gemini error", res.status, await res.text());
-      return NextResponse.json({ reply: "Sorry, I’m having trouble right now. Please try again in a moment." });
+      const errText = await res.text();
+      console.error("Gemini error", res.status, errText);
+      return NextResponse.json({
+        reply: "Sorry, I’m having trouble right now. Please try again in a moment.",
+        detail: `Gemini ${res.status} (model: ${model}): ${errText.slice(0, 300)}`,
+      });
     }
 
     const data = await res.json();
