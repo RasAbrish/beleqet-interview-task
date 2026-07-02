@@ -20,7 +20,8 @@ async function bootstrap() {
   const adminEmail = configService.get<string>('ADMIN_EMAIL')?.toLowerCase().trim();
   const adminPassword = configService.get<string>('ADMIN_PASSWORD');
   if (adminEmail && adminPassword) {
-    if (adminPassword.length < 12) throw new Error('ADMIN_PASSWORD must contain at least 12 characters');
+    if (adminPassword.length < 12)
+      throw new Error('ADMIN_PASSWORD must contain at least 12 characters');
     const prisma = app.get(PrismaService);
     await prisma.user.upsert({
       where: { email: adminEmail },
@@ -61,9 +62,9 @@ async function bootstrap() {
   // ── Validation ────────────────────────────────────────────────────────────
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,          // strip unknown props
+      whitelist: true, // strip unknown props
       forbidNonWhitelisted: true,
-      transform: true,          // auto-transform to DTO types
+      transform: true, // auto-transform to DTO types
       transformOptions: { enableImplicitConversion: true },
     }),
   );
