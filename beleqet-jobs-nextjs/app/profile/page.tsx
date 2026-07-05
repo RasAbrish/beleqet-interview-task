@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
 import { roleMeta } from "@/components/HeaderAuth";
+import BrandLoader from "@/components/BrandLoader";
 import { authenticatedFetch, updateStoredUser } from "@/lib/auth";
 import type { NotificationPreferences, UserProfile } from "@/types/user";
 
@@ -47,11 +48,7 @@ export default function ProfilePage() {
   }, [user]);
 
   if (!ready || !user || !profile) {
-    return (
-      <div className="container-page flex min-h-[60vh] items-center justify-center text-muted">
-        <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading account…
-      </div>
-    );
+    return <BrandLoader fullScreen={false} />;
   }
 
   const role = roleMeta[user.role] ?? { label: user.role, className: "bg-muted/10 text-muted" };

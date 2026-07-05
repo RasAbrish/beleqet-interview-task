@@ -1,5 +1,6 @@
 import { Check, Zap, Building2, Rocket, ArrowRight, Star } from "lucide-react";
 import Link from "next/link";
+import LogoMarquee from "@/components/LogoMarquee";
 
 export const metadata = {
   title: "Pricing | Beleqet Jobs",
@@ -245,17 +246,17 @@ export default function PricingPage() {
           <p className="text-xs font-extrabold uppercase tracking-widest text-muted">
             Trusted by leading Ethiopian employers
           </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-8 text-sm font-extrabold text-primary/40">
-            {[
-              "ethio telecom",
-              "Dashen Bank",
-              "Safaricom Ethiopia",
-              "TakaCash",
-              "Zemen Bank",
-              "BN Star Trading",
-            ].map((name) => (
-              <span key={name}>{name}</span>
-            ))}
+          <div className="mt-6">
+            <LogoMarquee
+              items={[
+                "ethio telecom",
+                "Dashen Bank",
+                "Safaricom Ethiopia",
+                "TakaCash",
+                "Zemen Bank",
+                "BN Star Trading",
+              ]}
+            />
           </div>
         </div>
       </section>
