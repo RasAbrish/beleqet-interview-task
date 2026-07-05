@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import JobsListing from "@/components/JobsListing";
 import { fetchCategories, fetchJobs } from "@/lib/api";
+import { JobsListingSkeleton } from "@/components/Skeletons";
 
 export const revalidate = 60;
 
@@ -12,7 +13,7 @@ export default async function JobsPage() {
   const [jobs, categories] = await Promise.all([fetchJobs(), fetchCategories()]);
 
   return (
-    <Suspense fallback={<div className="container-page py-20 text-center text-muted">Loading jobs…</div>}>
+    <Suspense fallback={<JobsListingSkeleton />}>
       <JobsListing initialJobs={jobs} categories={categories} />
     </Suspense>
   );

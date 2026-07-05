@@ -42,4 +42,11 @@ export class UploadsController {
   async uploadFile(@UploadedFile() file: any) {
     return this.uploadsService.uploadFile(file, 'resumes');
   }
+
+  @Post('avatar')
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 3 * 1024 * 1024 } }))
+  @ApiOperation({ summary: 'Upload a profile avatar image' })
+  async uploadAvatar(@UploadedFile() file: any) {
+    return this.uploadsService.uploadAvatar(file);
+  }
 }

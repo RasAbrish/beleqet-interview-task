@@ -124,4 +124,14 @@ export class UploadsService {
 
     return { publicUrl, key };
   }
+
+  async uploadAvatar(file: any) {
+    if (!file) throw new BadRequestException('Please attach an image');
+    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowed.includes(file.mimetype))
+      throw new BadRequestException('Profile photo must be a JPG, PNG, or WebP image');
+    if (file.size > 3 * 1024 * 1024)
+      throw new BadRequestException('Profile photo must be smaller than 3 MB');
+    return this.uploadFile(file, 'avatars');
+  }
 }

@@ -214,7 +214,7 @@ export class AuthService {
     return { success: true, message: 'Password reset successfully' };
   }
 
-  private async issueTokens(user: { id: string; email: string; firstName: string; lastName: string; role: string }) {
+  private async issueTokens(user: { id: string; email: string; firstName: string; lastName: string; role: string; avatarUrl?: string | null }) {
     const payload = { sub: user.id, email: user.email, role: user.role };
 
     const accessToken = this.jwt.sign(payload, {
@@ -251,6 +251,7 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
+        avatarUrl: user.avatarUrl ?? null,
       },
     };
   }

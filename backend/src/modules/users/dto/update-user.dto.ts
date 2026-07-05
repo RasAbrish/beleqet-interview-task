@@ -9,7 +9,7 @@ export class UpdateUserDto {
   @IsOptional() @IsString() @MinLength(1) @MaxLength(80) firstName?: string;
   @IsOptional() @IsString() @MinLength(1) @MaxLength(80) lastName?: string;
   @IsOptional() @IsString() phone?: string;
-  @IsOptional() @IsUrl() avatarUrl?: string;
+  @IsOptional() @IsUrl() avatarUrl?: string | null;
   @IsOptional() @IsString() telegramId?: string;
 
   // New Job Seeker fields

@@ -1,10 +1,11 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Bell,
   Briefcase,
+  Camera,
   Check,
   KeyRound,
   Loader2,
@@ -12,6 +13,7 @@ import {
   MapPin,
   Save,
   ShieldCheck,
+  Trash2,
   UserRound,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -92,6 +94,65 @@ export default function ProfilePage() {
     }
   }
 
+  async function persistAvatar(avatarUrl: string | null) {
+    if (!user) return;
+    const response = await authenticatedFetch(`${API_URL}/users/profile`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ avatarUrl }),
+    });
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(Array.isArray(data.message) ? data.message.join(", ") : data.message);
+    setProfile(data);
+    const nextUser = { ...user, avatarUrl: data.avatarUrl };
+    updateStoredUser(nextUser);
+    setUser(nextUser);
+  }
+
+  async function changeAvatar(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      toast.error("Choose a JPG, PNG, or WebP image");
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("Profile photo must be smaller than 3 MB");
+      return;
+    }
+    setSaving(true);
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const upload = await authenticatedFetch(`${API_URL}/uploads/avatar`, {
+        method: "POST",
+        body,
+      });
+      const result = await upload.json();
+      if (!upload.ok) throw new Error(result.message || "Photo could not be uploaded");
+      await persistAvatar(result.publicUrl);
+      toast.success("Profile photo updated");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Photo could not be updated");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function removeAvatar() {
+    setSaving(true);
+    try {
+      await persistAvatar(null);
+      toast.success("Profile photo removed");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Photo could not be removed");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function changePassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaving(true);
@@ -147,9 +208,7 @@ export default function ProfilePage() {
         <section className="overflow-hidden rounded-[28px] bg-primary text-white shadow-card">
           <div className="bg-gradient-to-r from-brandGreen/40 to-transparent p-6 sm:p-8">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-              <span className="inline-flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-[#d8ff3e] text-2xl font-black uppercase text-primary">
-                {initials}
-              </span>
+              <Avatar src={profile.avatarUrl} initials={initials} className="h-20 w-20 rounded-2xl text-2xl" />
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-extrabold uppercase tracking-[.2em] text-[#d8ff3e]">Account management</p>
                 <h1 className="mt-2 break-words text-3xl font-black">{profile.firstName} {profile.lastName}</h1>
@@ -170,7 +229,7 @@ export default function ProfilePage() {
             <TabButton active={tab === "notifications"} icon={Bell} label="Notifications" onClick={() => setTab("notifications")} />
           </nav>
 
-          {tab === "profile" && <ProfileForm profile={profile} saving={saving} onSubmit={saveProfile} />}
+          {tab === "profile" && <ProfileForm profile={profile} saving={saving} onSubmit={saveProfile} onAvatarChange={changeAvatar} onAvatarRemove={removeAvatar} />}
           {tab === "security" && <PasswordForm saving={saving} onSubmit={changePassword} />}
           {tab === "notifications" && (
             <NotificationSettings
@@ -189,10 +248,25 @@ export default function ProfilePage() {
   );
 }
 
-function ProfileForm({ profile, saving, onSubmit }: { profile: UserProfile; saving: boolean; onSubmit: (event: FormEvent<HTMLFormElement>) => void }) {
+function ProfileForm({ profile, saving, onSubmit, onAvatarChange, onAvatarRemove }: { profile: UserProfile; saving: boolean; onSubmit: (event: FormEvent<HTMLFormElement>) => void; onAvatarChange: (event: ChangeEvent<HTMLInputElement>) => void; onAvatarRemove: () => void }) {
+  const initials = `${profile.firstName[0] ?? ""}${profile.lastName[0] ?? ""}`;
   return (
     <form onSubmit={onSubmit} className="rounded-2xl border border-border bg-white p-5 sm:p-7">
       <SectionTitle title="Profile details" text="Keep your professional information accurate and current." />
+      <div className="mt-7 flex flex-col gap-4 rounded-2xl bg-pageBg p-4 sm:flex-row sm:items-center">
+        <Avatar src={profile.avatarUrl} initials={initials} className="h-20 w-20 rounded-full text-xl" />
+        <div className="flex-1">
+          <p className="font-bold text-primary">Profile photo</p>
+          <p className="mt-1 text-xs text-muted">JPG, PNG, or WebP. Maximum size 3 MB.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold text-white hover:bg-brandGreen">
+              <Camera className="h-4 w-4" /> {profile.avatarUrl ? "Change photo" : "Upload photo"}
+              <input type="file" accept="image/jpeg,image/png,image/webp" onChange={onAvatarChange} disabled={saving} className="sr-only" />
+            </label>
+            {profile.avatarUrl && <button type="button" onClick={onAvatarRemove} disabled={saving} className="inline-flex items-center gap-2 rounded-full border border-redAccent/20 px-4 py-2 text-xs font-bold text-redAccent hover:bg-redAccent/5"><Trash2 className="h-4 w-4" />Remove</button>}
+          </div>
+        </div>
+      </div>
       <div className="mt-7 grid gap-5 sm:grid-cols-2">
         <Field name="firstName" label="First name" defaultValue={profile.firstName} required />
         <Field name="lastName" label="Last name" defaultValue={profile.lastName} required />
@@ -270,4 +344,10 @@ function SubmitButton({ saving, label }: { saving: boolean; label: string }) {
 
 function TabButton({ active, icon: Icon, label, onClick }: { active: boolean; icon: typeof Briefcase; label: string; onClick: () => void }) {
   return <button type="button" onClick={onClick} className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-bold transition ${active ? "bg-primary text-white" : "text-muted hover:bg-pageBg hover:text-primary"}`}><Icon className="h-4 w-4" />{label}</button>;
+}
+
+function Avatar({ src, initials, className }: { src?: string | null; initials: string; className: string }) {
+  return src
+    ? <img src={src} alt="Profile" className={`${className} shrink-0 object-cover ring-4 ring-white/20`} />
+    : <span className={`${className} inline-flex shrink-0 items-center justify-center bg-[#d8ff3e] font-black uppercase text-primary`}>{initials}</span>;
 }

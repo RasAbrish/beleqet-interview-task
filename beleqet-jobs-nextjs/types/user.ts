@@ -19,6 +19,7 @@ export type UserProfile = NotificationPreferences & {
   lastName: string;
   role: string;
   phone?: string | null;
+  avatarUrl?: string | null;
   headline?: string | null;
   bio?: string | null;
   location?: string | null;

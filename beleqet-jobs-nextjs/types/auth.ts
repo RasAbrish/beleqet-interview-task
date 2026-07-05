@@ -4,6 +4,7 @@ export type AuthUser = {
   firstName: string;
   lastName: string;
   role: string;
+  avatarUrl?: string | null;
 };
 
 export type RegisterInput = {

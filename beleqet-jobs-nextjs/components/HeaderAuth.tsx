@@ -77,9 +77,7 @@ export default function HeaderAuth() {
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-2 rounded-full border border-border py-1 pl-1 pr-2 hover:bg-pageBg transition-colors"
       >
-        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-brandGreen to-darkGreen text-white text-xs font-bold uppercase">
-          {initials}
-        </span>
+        <AccountAvatar src={user.avatarUrl} initials={initials} className="h-8 w-8 text-xs" />
         <span className="hidden sm:block max-w-[7rem] truncate text-sm font-medium text-ink">
           {user.firstName}
         </span>
@@ -92,9 +90,7 @@ export default function HeaderAuth() {
         <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-2xl border border-border bg-white shadow-cardHover">
           <div className="border-b border-border p-4">
             <div className="flex items-center gap-3">
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-brandGreen to-darkGreen text-sm font-bold uppercase text-white">
-                {initials}
-              </span>
+              <AccountAvatar src={user.avatarUrl} initials={initials} className="h-11 w-11 text-sm" />
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-ink">
                   {user.firstName} {user.lastName}
@@ -157,6 +153,12 @@ export default function HeaderAuth() {
       )}
     </div>
   );
+}
+
+function AccountAvatar({ src, initials, className }: { src?: string | null; initials: string; className: string }) {
+  return src
+    ? <img src={src} alt="" className={`${className} shrink-0 rounded-full object-cover`} />
+    : <span className={`${className} inline-flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brandGreen to-darkGreen font-bold uppercase text-white`}>{initials}</span>;
 }
 
 function MenuLink({

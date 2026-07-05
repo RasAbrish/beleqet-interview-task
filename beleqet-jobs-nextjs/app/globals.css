@@ -45,6 +45,42 @@ canvas {
   color: #041603;
 }
 
+@keyframes brand-loader-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.025); }
+}
+
+@keyframes brand-loader-orbit {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes brand-loader-progress {
+  0% { transform: translateX(-110%); }
+  50% { transform: translateX(15%); }
+  100% { transform: translateX(110%); }
+}
+
+.brand-loader-mark {
+  animation: brand-loader-float 1.8s ease-in-out infinite;
+}
+
+.brand-loader-orbit {
+  animation: brand-loader-orbit 1.5s linear infinite;
+}
+
+.brand-loader-progress {
+  width: 70%;
+  animation: brand-loader-progress 1.25s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-loader-mark,
+  .brand-loader-orbit,
+  .brand-loader-progress {
+    animation: none;
+  }
+}
+
 .hero-grid::before {
   content: "";
   position: absolute;

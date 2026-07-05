@@ -14,6 +14,7 @@ export const userSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
   role: z.string(),
+  avatarUrl: z.string().nullish(),
 });
 
 const authResponseSchema = z.object({

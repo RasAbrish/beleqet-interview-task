@@ -1,6 +1,6 @@
 export function JobCardSkeleton() {
   return (
-    <div className="flex flex-col rounded-xl border border-border bg-white p-5 animate-pulse">
+    <div className="flex min-h-[280px] flex-col rounded-[22px] border border-border bg-white p-5 animate-pulse" aria-hidden="true">
       <div className="flex items-start justify-between">
         <div className="h-10 w-10 rounded-lg bg-pageBg" />
         <div className="h-4 w-4 rounded bg-pageBg" />
@@ -50,18 +50,38 @@ export function CategoryGridSkeleton() {
 
 export function JobsListingSkeleton() {
   return (
-    <div className="container-page py-10">
-      <div className="h-8 w-2/3 rounded bg-pageBg animate-pulse" />
-      <div className="h-4 w-24 rounded bg-pageBg mt-3 animate-pulse" />
-      <div className="h-16 rounded-2xl border border-border bg-white mt-6 mb-8 animate-pulse" />
-      <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8">
-        <div className="h-72 rounded-xl border border-border bg-white animate-pulse" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <JobCardSkeleton key={i} />
-          ))}
+    <div className="container-page py-10" role="status" aria-label="Loading jobs">
+      <div className="animate-pulse">
+        <div className="h-12 w-full max-w-4xl rounded-xl bg-primary/10 sm:h-16" />
+        <div className="mt-3 h-4 w-24 rounded bg-primary/10" />
+        <div className="mt-6 flex h-[68px] items-center gap-3 rounded-2xl border border-border bg-white p-3 shadow-card">
+          <div className="h-10 flex-1 rounded-xl bg-pageBg" />
+          <div className="hidden h-10 flex-1 rounded-xl bg-pageBg sm:block" />
+          <div className="h-11 w-28 rounded-xl bg-brandGreen/20" />
         </div>
       </div>
+      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
+        <div className="space-y-6" aria-hidden="true">
+          <div className="rounded-xl border border-border bg-white p-5">
+            <div className="h-5 w-28 animate-pulse rounded bg-pageBg" />
+            <div className="mt-5 space-y-3">{Array.from({ length: 7 }).map((_, i) => <div key={i} className="h-8 animate-pulse rounded-lg bg-pageBg" />)}</div>
+          </div>
+          <div className="rounded-xl border border-border bg-white p-5">
+            <div className="h-5 w-24 animate-pulse rounded bg-pageBg" />
+            <div className="mt-5 space-y-3">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-8 animate-pulse rounded-lg bg-pageBg" />)}</div>
+          </div>
+        </div>
+        <div>
+          <div className="mb-4 flex justify-between" aria-hidden="true"><div className="h-4 w-40 animate-pulse rounded bg-pageBg" /><div className="h-4 w-20 animate-pulse rounded bg-pageBg" /></div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <JobCardSkeleton key={i} />
+          ))}
+          </div>
+          <div className="mx-auto mt-8 h-10 w-72 max-w-full animate-pulse rounded-full bg-pageBg" aria-hidden="true" />
+        </div>
+      </div>
+      <span className="sr-only">Loading job results…</span>
     </div>
   );
 }

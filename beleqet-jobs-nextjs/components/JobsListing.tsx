@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { Search, MapPin, SlidersHorizontal, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ChevronLeft, ChevronRight, Search, MapPin, SlidersHorizontal, X } from "lucide-react";
 import type { Job, Category } from "@/lib/api";
 import JobCard from "@/components/JobCard";
 
 const jobTypes = ["Full Time", "Part Time", "Remote", "Hybrid", "Contract"];
+const JOBS_PER_PAGE = 8;
 
 export default function JobsListing({
   initialJobs,
@@ -16,11 +17,18 @@ export default function JobsListing({
   categories: Category[];
 }) {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [location, setLocation] = useState(searchParams.get("loc") ?? "");
   const [category, setCategory] = useState(searchParams.get("category") ?? "");
   const [type, setType] = useState<string>("");
+  const requestedPage = Number(searchParams.get("page"));
+  const [page, setPage] = useState(
+    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1,
+  );
 
   const filtered = useMemo(() => {
     return initialJobs.filter((job) => {
@@ -37,12 +45,40 @@ export default function JobsListing({
 
   const categoryLabel = categories.find((c) => c.id === category)?.label;
   const hasFilters = Boolean(query || location || category || type);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / JOBS_PER_PAGE));
+  const currentPage = Math.min(page, totalPages);
+  const visibleJobs = filtered.slice(
+    (currentPage - 1) * JOBS_PER_PAGE,
+    currentPage * JOBS_PER_PAGE,
+  );
+  const firstResult = filtered.length ? (currentPage - 1) * JOBS_PER_PAGE + 1 : 0;
+  const lastResult = Math.min(currentPage * JOBS_PER_PAGE, filtered.length);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (currentPage > 1) params.set("page", String(currentPage));
+    else params.delete("page");
+    const next = params.toString();
+    router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
+  }, [currentPage, pathname, router, searchParams]);
+
+  function changePage(nextPage: number) {
+    setPage(Math.min(Math.max(nextPage, 1), totalPages));
+    requestAnimationFrame(() => {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 
   function clearAll() {
     setQuery("");
     setLocation("");
     setCategory("");
     setType("");
+    setPage(1);
   }
 
   return (
@@ -62,7 +98,7 @@ export default function JobsListing({
           <Search className="h-4 w-4 text-muted shrink-0" />
           <input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); setPage(1); }}
             placeholder="Job title, keyword or company"
             className="w-full text-sm text-ink placeholder:text-muted outline-none"
           />
@@ -72,7 +108,7 @@ export default function JobsListing({
           <MapPin className="h-4 w-4 text-muted shrink-0" />
           <input
             value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            onChange={(e) => { setLocation(e.target.value); setPage(1); }}
             placeholder="Location e.g. Addis Ababa"
             className="w-full text-sm text-ink placeholder:text-muted outline-none"
           />
@@ -87,10 +123,10 @@ export default function JobsListing({
 
       {hasFilters && (
         <div className="mb-4 flex shrink-0 flex-wrap items-center gap-2">
-          {query && <FilterChip label={`“${query}”`} onClear={() => setQuery("")} />}
-          {location && <FilterChip label={location} onClear={() => setLocation("")} />}
-          {category && <FilterChip label={categoryLabel ?? category} onClear={() => setCategory("")} />}
-          {type && <FilterChip label={type} onClear={() => setType("")} />}
+          {query && <FilterChip label={`“${query}”`} onClear={() => { setQuery(""); setPage(1); }} />}
+          {location && <FilterChip label={location} onClear={() => { setLocation(""); setPage(1); }} />}
+          {category && <FilterChip label={categoryLabel ?? category} onClear={() => { setCategory(""); setPage(1); }} />}
+          {type && <FilterChip label={type} onClear={() => { setType(""); setPage(1); }} />}
           <button onClick={clearAll} className="text-xs font-semibold text-brandGreen hover:underline ml-1">
             Clear all
           </button>
@@ -104,11 +140,11 @@ export default function JobsListing({
               <SlidersHorizontal className="h-4 w-4" /> Category
             </h3>
             <div className="max-h-80 space-y-1 overflow-y-auto pr-1">
-              <FilterButton active={category === ""} onClick={() => setCategory("")}>
+              <FilterButton active={category === ""} onClick={() => { setCategory(""); setPage(1); }}>
                 All Categories
               </FilterButton>
               {categories.map((cat) => (
-                <FilterButton key={cat.id} active={category === cat.id} onClick={() => setCategory(cat.id)}>
+                <FilterButton key={cat.id} active={category === cat.id} onClick={() => { setCategory(cat.id); setPage(1); }}>
                   <span className="flex w-full items-center justify-between">
                     <span>{cat.label}</span>
                     {cat.count ? <span className="text-xs text-muted">{cat.count}</span> : null}
@@ -121,11 +157,11 @@ export default function JobsListing({
           <div className="rounded-xl border border-border bg-white p-5">
             <h3 className="text-sm font-semibold text-ink mb-4">Job Type</h3>
             <div className="space-y-1">
-              <FilterButton active={type === ""} onClick={() => setType("")}>
+              <FilterButton active={type === ""} onClick={() => { setType(""); setPage(1); }}>
                 All Types
               </FilterButton>
               {jobTypes.map((t) => (
-                <FilterButton key={t} active={type === t} onClick={() => setType(t)}>
+                <FilterButton key={t} active={type === t} onClick={() => { setType(t); setPage(1); }}>
                   {t}
                 </FilterButton>
               ))}
@@ -133,7 +169,7 @@ export default function JobsListing({
           </div>
         </aside>
 
-        <div className="min-w-0">
+        <div ref={resultsRef} className="min-w-0 scroll-mt-28">
           {filtered.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border bg-white p-12 text-center">
               <p className="text-ink font-semibold">No jobs match your filters</p>
@@ -148,16 +184,50 @@ export default function JobsListing({
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {filtered.map((job) => (
-                <JobCard key={job.id} job={job} variant="light" />
-              ))}
-            </div>
+            <>
+              <div className="mb-4 flex items-center justify-between gap-4 text-sm text-muted">
+                <p>Showing <span className="font-semibold text-ink">{firstResult}–{lastResult}</span> of <span className="font-semibold text-ink">{filtered.length}</span> jobs</p>
+                <p className="hidden sm:block">Page {currentPage} of {totalPages}</p>
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {visibleJobs.map((job) => (
+                  <JobCard key={job.id} job={job} variant="light" />
+                ))}
+              </div>
+              {totalPages > 1 && (
+                <Pagination page={currentPage} totalPages={totalPages} onChange={changePage} />
+              )}
+            </>
           )}
         </div>
       </div>
     </div>
   );
+}
+
+function Pagination({ page, totalPages, onChange }: { page: number; totalPages: number; onChange: (page: number) => void }) {
+  const pages = paginationItems(page, totalPages);
+  return (
+    <nav className="mt-8 flex items-center justify-center gap-1.5" aria-label="Job results pagination">
+      <PageButton label="Previous page" disabled={page === 1} onClick={() => onChange(page - 1)}><ChevronLeft className="h-4 w-4" /></PageButton>
+      {pages.map((item, index) => item === "…"
+        ? <span key={`ellipsis-${index}`} className="px-2 text-muted" aria-hidden="true">…</span>
+        : <button key={item} type="button" onClick={() => onChange(item)} aria-label={`Page ${item}`} aria-current={item === page ? "page" : undefined} className={`h-10 min-w-10 rounded-full px-3 text-sm font-bold transition ${item === page ? "bg-primary text-white" : "border border-border bg-white text-ink hover:border-brandGreen hover:text-brandGreen"}`}>{item}</button>
+      )}
+      <PageButton label="Next page" disabled={page === totalPages} onClick={() => onChange(page + 1)}><ChevronRight className="h-4 w-4" /></PageButton>
+    </nav>
+  );
+}
+
+function PageButton({ label, disabled, onClick, children }: { label: string; disabled: boolean; onClick: () => void; children: React.ReactNode }) {
+  return <button type="button" aria-label={label} disabled={disabled} onClick={onClick} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-ink transition hover:border-brandGreen hover:text-brandGreen disabled:cursor-not-allowed disabled:opacity-40">{children}</button>;
+}
+
+function paginationItems(page: number, total: number): Array<number | "…"> {
+  if (total <= 7) return Array.from({ length: total }, (_, index) => index + 1);
+  if (page <= 4) return [1, 2, 3, 4, 5, "…", total];
+  if (page >= total - 3) return [1, "…", total - 4, total - 3, total - 2, total - 1, total];
+  return [1, "…", page - 1, page, page + 1, "…", total];
 }
 
 function FilterButton({
