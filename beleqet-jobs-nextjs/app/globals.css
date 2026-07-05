@@ -10,12 +10,21 @@ html,
 body {
   width: 100%;
   max-width: 100%;
-  overflow-x: clip;
+  margin: 0;
+  overflow-x: hidden;
 }
 
 body {
+  position: relative;
   background: #f7f5ef;
   color: #1e293b;
+}
+
+main {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 *,

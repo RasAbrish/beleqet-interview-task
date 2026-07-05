@@ -28,7 +28,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <AuthProvider>
           <Header />
-          <main>{children}</main>
+          <main className="min-w-0 max-w-full overflow-x-hidden">{children}</main>
           <Footer />
           <ChatWidget />
         </AuthProvider>
