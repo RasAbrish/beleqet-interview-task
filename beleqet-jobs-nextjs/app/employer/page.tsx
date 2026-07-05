@@ -1,10 +1,11 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { BriefcaseBusiness, Eye, Plus, Users } from "lucide-react";
+import { BriefcaseBusiness, Eye, Lock, Pencil, Plus, Users } from "lucide-react";
 import { authenticatedFetch } from "@/lib/auth";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
+import EditJobModal from "@/components/EditJobModal";
 import type { Applicant, EmployerJob } from "@/types/applications";
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
@@ -22,6 +23,7 @@ export default function EmployerPage() {
   const [jobs, setJobs] = useState<EmployerJob[]>([]);
   const [selected, setSelected] = useState<EmployerJob | null>(null);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
+  const [editing, setEditing] = useState<EmployerJob | null>(null);
   const loadJobs = useCallback(async () => {
     const response = await authenticatedFetch(`${API_URL}/jobs/my`);
     if (response.ok) setJobs(await response.json());
@@ -112,13 +114,30 @@ export default function EmployerPage() {
                   <td>{job.status}</td>
                   <td>{job._count.applications}</td>
                   <td>{new Date(job.createdAt).toLocaleDateString()}</td>
-                  <td>
-                    <button
-                      onClick={() => openApplicants(job)}
-                      className="text-xs font-bold text-brandGreen"
-                    >
-                      Manage applicants
-                    </button>
+                  <td className="pr-4">
+                    <div className="flex items-center justify-end gap-3">
+                      {job._count.applications > 0 ? (
+                        <span
+                          title="Locked — candidates have already applied to this job"
+                          className="inline-flex cursor-not-allowed items-center gap-1 text-xs font-bold text-muted/70"
+                        >
+                          <Lock className="h-3.5 w-3.5" /> Edit
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => setEditing(job)}
+                          className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-brandGreen"
+                        >
+                          <Pencil className="h-3.5 w-3.5" /> Edit
+                        </button>
+                      )}
+                      <button
+                        onClick={() => openApplicants(job)}
+                        className="text-xs font-bold text-brandGreen"
+                      >
+                        Manage applicants
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -180,6 +199,16 @@ export default function EmployerPage() {
           </section>
         )}
       </div>
+      {editing && (
+        <EditJobModal
+          job={editing}
+          onClose={() => setEditing(null)}
+          onSaved={() => {
+            setEditing(null);
+            loadJobs();
+          }}
+        />
+      )}
     </div>
   );
 }

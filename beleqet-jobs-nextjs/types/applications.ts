@@ -25,6 +25,14 @@ export type EmployerJob = {
   title: string;
   status: string;
   createdAt: string;
+  description: string;
+  requirements?: string | null;
+  location: string;
+  type: string;
+  categoryId: string;
+  salaryMin?: number | null;
+  salaryMax?: number | null;
+  deadline?: string | null;
   _count: { applications: number };
 };
 

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, ConflictException, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { ConfigService } from '@nestjs/config';
@@ -122,9 +122,27 @@ export class JobsService {
     return job;
   }
 
+  // Once a job has applications, its terms are locked so they stay fair to
+  // candidates who already applied. Only these fields may still change.
+  private static readonly EDITABLE_AFTER_APPLY = new Set(['status', 'filled', 'urgent']);
+
   async update(id: string, employerId: string, dto: Partial<CreateJobDto>) {
-    const job = await this.prisma.job.findFirst({ where: { id, company: { userId: employerId } } });
+    const job = await this.prisma.job.findFirst({
+      where: { id, company: { userId: employerId } },
+      include: { _count: { select: { applications: true } } },
+    });
     if (!job) throw new NotFoundException('Job not found or access denied');
+
+    if (job._count.applications > 0) {
+      const blocked = Object.keys(dto).filter(
+        (key) => !JobsService.EDITABLE_AFTER_APPLY.has(key),
+      );
+      if (blocked.length > 0)
+        throw new ConflictException(
+          'This job already has applications and can no longer be edited. You can still close it or mark it as filled.',
+        );
+    }
+
     return this.prisma.job.update({ where: { id }, data: dto as never });
   }
 
