@@ -16,6 +16,24 @@ import { passwordResetEmail, verificationEmail, loginAlertEmail, logoutAlertEmai
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
+  /**
+   * Resolves the public frontend base URL used to build links in emails
+   * (verification, password reset, welcome). In every environment this comes
+   * from FRONTEND_URL — set to https://beleqet-frontend.onrender.com in
+   * render.yaml for production and to the local host in dev. We only fall back
+   * to localhost outside production; if it is missing in production we log an
+   * error instead of silently emitting broken localhost links.
+   */
+  private frontendUrl(): string {
+    const url = this.config.get<string>('FRONTEND_URL');
+    if (url) return url.replace(/\/+$/, '');
+    if (this.config.get<string>('NODE_ENV') === 'production')
+      this.logger.error(
+        'FRONTEND_URL is not set in production — email links may be broken.',
+      );
+    return 'http://localhost:3000';
+  }
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
@@ -48,7 +66,7 @@ export class AuthService {
     );
 
     // Send personalised welcome email
-    const frontendUrl = this.config.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
+    const frontendUrl = this.frontendUrl();
     const dashboardUrl = user.role === 'EMPLOYER'
       ? `${frontendUrl}/employer`
       : user.role === 'FREELANCER'
@@ -147,7 +165,7 @@ export class AuthService {
       }
     });
 
-    const verifyUrl = `${this.config.get('FRONTEND_URL')}/auth/verify-email?token=${token}`;
+    const verifyUrl = `${this.frontendUrl()}/auth/verify-email?token=${token}`;
     const email = await verificationEmail(user.firstName, verifyUrl);
 
     await this.notificationsQueue.add(NOTIFICATION_JOBS.SEND_EMAIL, {
@@ -186,7 +204,7 @@ export class AuthService {
       }
     });
 
-    const resetUrl = `${this.config.get('FRONTEND_URL')}/auth/reset-password?token=${token}`;
+    const resetUrl = `${this.frontendUrl()}/auth/reset-password?token=${token}`;
     const emailContent = await passwordResetEmail(user.firstName, resetUrl);
 
     await this.notificationsQueue.add(NOTIFICATION_JOBS.SEND_EMAIL, {
