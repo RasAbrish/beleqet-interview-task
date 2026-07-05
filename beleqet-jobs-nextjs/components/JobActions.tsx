@@ -30,6 +30,15 @@ export default function JobActions({ jobId }: { jobId: string }) {
     });
   }, [jobId, user]);
 
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
   async function toggleSaved() {
     if (!user) {
       router.push(`/login?next=${encodeURIComponent(`/jobs/${jobId}`)}`);
@@ -73,7 +82,7 @@ export default function JobActions({ jobId }: { jobId: string }) {
         body: formData,
       },
     );
-    const data = await response.json();
+    const data = await response.json().catch(() => ({}));
     if (!response.ok)
       throw new Error(data.message || "Resume upload failed. Please try again.");
     return data.publicUrl;
@@ -150,20 +159,20 @@ export default function JobActions({ jobId }: { jobId: string }) {
 
       {open && (
         <div
-          className="fixed inset-0 z-[70] flex items-end justify-center bg-primary/70 p-0 backdrop-blur-sm sm:items-center sm:p-5"
+          className="fixed inset-0 z-[70] flex min-w-0 items-end justify-center overflow-x-hidden bg-primary/70 p-0 backdrop-blur-sm sm:items-center sm:p-5"
           role="dialog"
           aria-modal="true"
           aria-labelledby="application-title"
         >
-          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-t-[28px] bg-[#f7f5ef] shadow-2xl sm:rounded-[28px]">
+          <div className="max-h-[92dvh] min-w-0 w-full max-w-2xl overflow-x-hidden overflow-y-auto rounded-t-[28px] bg-[#f7f5ef] shadow-2xl sm:rounded-[28px]">
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-primary/10 bg-white px-6 py-5">
-              <div>
+              <div className="min-w-0 pr-3">
                 <p className="text-xs font-extrabold uppercase tracking-wider text-brandGreen">
                   Job application
                 </p>
                 <h2
                   id="application-title"
-                  className="mt-1 text-xl font-black text-primary"
+                  className="mt-1 break-words text-xl font-black text-primary"
                 >
                   Tell the employer about yourself
                 </h2>
@@ -194,13 +203,13 @@ export default function JobActions({ jobId }: { jobId: string }) {
               </label>
               <label className="block text-xs font-bold text-ink">
                 Resume or CV
-                <span className="mt-1.5 flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-primary/15 bg-white p-5 text-sm font-semibold text-muted hover:border-brandGreen">
-                  <FileUp className="h-5 w-5 text-brandGreen" />
+                <span className="mt-1.5 flex min-w-0 cursor-pointer items-center gap-3 overflow-hidden rounded-xl border-2 border-dashed border-primary/15 bg-white p-4 text-sm font-semibold text-muted hover:border-brandGreen sm:p-5">
+                  <FileUp className="h-5 w-5 shrink-0 text-brandGreen" />
                   <input
                     name="resume"
                     type="file"
                     accept=".pdf,.doc,.docx"
-                    className="min-w-0 text-xs"
+                    className="block min-w-0 w-full max-w-full overflow-hidden text-xs file:mr-2 file:max-w-[8rem] file:truncate"
                   />
                 </span>
                 <span className="mt-1 block font-normal text-muted">

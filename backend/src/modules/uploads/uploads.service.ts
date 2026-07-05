@@ -1,4 +1,10 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -75,6 +81,8 @@ export class UploadsService {
   async uploadFile(file: any, folder = 'misc') {
     if (!this.s3Client)
       throw new InternalServerErrorException('Cloud storage not configured on server');
+    if (!file)
+      throw new BadRequestException('Please attach a file to upload');
 
     const ext = path.extname(file.originalname);
     const key = `${folder}/${uuidv4()}${ext}`;
@@ -86,7 +94,22 @@ export class UploadsService {
       ContentType: file.mimetype,
     });
 
-    await this.s3Client.send(command);
+    try {
+      await this.s3Client.send(command);
+    } catch (error) {
+      const storageError = error as { name?: string; Code?: string };
+      const code = storageError.name ?? storageError.Code;
+      this.logger.error(`Upload to bucket "${this.bucket}" failed (${code ?? 'unknown error'})`);
+
+      if (code === 'NoSuchBucket') {
+        throw new ServiceUnavailableException(
+          'Resume storage is temporarily unavailable. The configured storage bucket does not exist.',
+        );
+      }
+      throw new ServiceUnavailableException(
+        'Resume storage is temporarily unavailable. Please try again later.',
+      );
+    }
 
     const publicBaseUrl = this.config.get<string>('R2_PUBLIC_BASE_URL');
     const endpoint = this.config.get<string>('AWS_ENDPOINT');
