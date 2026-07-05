@@ -44,6 +44,9 @@ export class NotificationsProcessor {
         pass: this.config.get<string>('SMTP_PASSWORD') ?? this.config.get<string>('SMTP_PASS'),
       },
       secure: this.config.get<string>('SMTP_SECURE', 'false') === 'true',
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 15_000,
     });
   }
 
@@ -93,6 +96,17 @@ export class NotificationsProcessor {
     const { to, subject, html, text } = job.data;
     if (!to) return;
 
+    const host = this.config.get<string>('SMTP_HOST');
+    const user = this.config.get<string>('SMTP_USER');
+    const password =
+      this.config.get<string>('SMTP_PASSWORD') ??
+      this.config.get<string>('SMTP_PASS');
+    if (!host || !user || !password) {
+      throw new Error(
+        'Email delivery is not configured. Set SMTP_HOST, SMTP_PORT, SMTP_USER and SMTP_PASSWORD.',
+      );
+    }
+
     try {
       await this.transporter.sendMail({
         from:
@@ -105,7 +119,12 @@ export class NotificationsProcessor {
       });
       this.logger.debug(`Email → ${to}: ${subject}`);
     } catch (e) {
-      this.logger.warn(`Email failed: ${(e as Error).message}`);
+      // Bull retries only when the processor rejects. Swallowing this error
+      // made failed SMTP deliveries look like successfully completed jobs.
+      this.logger.error(
+        `Email to ${to} failed (attempt ${job.attemptsMade + 1}): ${(e as Error).message}`,
+      );
+      throw e;
     }
   }
 }
