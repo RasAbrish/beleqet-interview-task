@@ -1,5 +1,5 @@
 import { Processor, Process } from '@nestjs/bull';
-import { Logger, Injectable } from '@nestjs/common';
+import { Logger, Injectable, OnModuleInit } from '@nestjs/common';
 import { Job } from 'bull';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -28,7 +28,7 @@ export interface EmailPayload {
 
 @Injectable()
 @Processor(QUEUE_NAMES.NOTIFICATIONS)
-export class NotificationsProcessor {
+export class NotificationsProcessor implements OnModuleInit {
   private readonly logger = new Logger(NotificationsProcessor.name);
   private readonly transporter: nodemailer.Transporter;
 
@@ -48,6 +48,30 @@ export class NotificationsProcessor {
       greetingTimeout: 10_000,
       socketTimeout: 15_000,
     });
+  }
+
+  async onModuleInit() {
+    const host = this.config.get<string>('SMTP_HOST');
+    const user = this.config.get<string>('SMTP_USER');
+    const password =
+      this.config.get<string>('SMTP_PASSWORD') ??
+      this.config.get<string>('SMTP_PASS');
+
+    if (!host || !user || !password) {
+      this.logger.error(
+        'SMTP is not configured; outgoing emails will not be delivered. Set SMTP_HOST, SMTP_PORT, SMTP_USER and SMTP_PASSWORD.',
+      );
+      return;
+    }
+
+    try {
+      await this.transporter.verify();
+      this.logger.log(`SMTP connection verified (${host})`);
+    } catch (error) {
+      this.logger.error(
+        `SMTP verification failed (${host}): ${(error as Error).message}`,
+      );
+    }
   }
 
   @Process(NOTIFICATION_JOBS.SEND_IN_APP)
@@ -102,9 +126,11 @@ export class NotificationsProcessor {
       this.config.get<string>('SMTP_PASSWORD') ??
       this.config.get<string>('SMTP_PASS');
     if (!host || !user || !password) {
-      throw new Error(
+      const error = new Error(
         'Email delivery is not configured. Set SMTP_HOST, SMTP_PORT, SMTP_USER and SMTP_PASSWORD.',
       );
+      this.logger.error(error.message);
+      throw error;
     }
 
     try {
