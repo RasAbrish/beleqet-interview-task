@@ -1,10 +1,14 @@
 // dto/create-application.dto.ts
-import { IsUUID, IsString, IsOptional, IsUrl, MinLength, MaxLength, IsInt, IsObject, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsUrl, MinLength, MaxLength, IsInt, IsObject, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateApplicationDto {
   @ApiProperty({ description: 'UUID of the job being applied to', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @IsUUID()
+  // Job IDs are strings in Prisma. Accept legacy seeded IDs as well as UUIDs;
+  // the service verifies that the referenced published job actually exists.
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(64)
   jobId: string;
 
   @ApiProperty({ required: false, example: 'I am writing to express my interest in this position. I have over 5 years of experience building scalable backend APIs using NestJS and PostgreSQL...' })

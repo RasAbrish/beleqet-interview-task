@@ -168,7 +168,7 @@ async function main() {
     description: string;
   }[] = [
     {
-      id: '11111111-1111-1111-1111-111111111101',
+      id: 'd89b54b6-36f0-4304-864c-2e2274bbe436',
       title: 'Full Stack Developer',
       slug: 'software-design-and-development',
       location: 'Addis Ababa',
@@ -180,7 +180,7 @@ async function main() {
         'Build and maintain customer-facing fintech products across a Next.js front end and Node services, shipping features end to end with product and design.',
     },
     {
-      id: '11111111-1111-1111-1111-111111111102',
+      id: '8a0b7d88-10d4-437f-bc62-c728c8840757',
       title: 'Digital Marketing Specialist',
       slug: 'marketing-and-advertisement',
       location: 'Addis Ababa',
@@ -192,7 +192,7 @@ async function main() {
         'Plan and execute digital campaigns across search, social, and Telegram channels, owning performance reporting and qualified lead growth.',
     },
     {
-      id: '11111111-1111-1111-1111-111111111103',
+      id: '150e880b-06cb-487a-9534-c28805f50501',
       title: 'Customer Service Agent',
       slug: 'customer-service-and-care',
       location: 'Addis Ababa',
@@ -204,7 +204,7 @@ async function main() {
         'Handle customer inquiries across branch and digital channels, resolve account issues, and maintain service standards.',
     },
     {
-      id: '11111111-1111-1111-1111-111111111104',
+      id: 'dc10016d-d0ea-46ea-b761-30c87a182ab1',
       title: 'Graphic Designer',
       slug: 'creative-art-and-design',
       location: 'Remote',
@@ -216,7 +216,7 @@ async function main() {
         'Design marketing assets, social creatives, and brand collateral for a fast-moving product team. Portfolio required.',
     },
     {
-      id: '11111111-1111-1111-1111-111111111105',
+      id: '4bf2fd29-4080-4222-a270-95b0bfd9efe3',
       title: 'Senior Accountant',
       slug: 'accounting-and-finance',
       location: 'Addis Ababa',
@@ -228,7 +228,7 @@ async function main() {
         'Manage the general ledger, monthly closing, and financial reporting for a growing trading company.',
     },
     {
-      id: '11111111-1111-1111-1111-111111111106',
+      id: 'f19b15a8-6238-48db-ba34-f09905cdf926',
       title: 'IT Support Officer',
       slug: 'information-technology',
       location: 'Addis Ababa',
@@ -240,7 +240,7 @@ async function main() {
         'Provide first-line IT support, maintain workstations and networks, and resolve incidents across the head office.',
     },
     {
-      id: '11111111-1111-1111-1111-111111111107',
+      id: '2fb91cea-dd16-424f-8f13-1afbc07196d2',
       title: 'HR & Admin Officer',
       slug: 'human-resource-and-talent-management',
       location: 'Addis Ababa',
@@ -252,7 +252,7 @@ async function main() {
         'Support recruitment, onboarding, and day-to-day HR administration for the Addis Ababa office.',
     },
     {
-      id: '11111111-1111-1111-1111-111111111108',
+      id: '44318dd3-ccd0-412a-b8ef-2e9e82207457',
       title: 'Frontend Engineer',
       slug: 'software-design-and-development',
       location: 'Remote',
