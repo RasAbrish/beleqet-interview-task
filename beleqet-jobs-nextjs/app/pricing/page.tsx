@@ -1,4 +1,16 @@
-import { Check, Zap, Building2, Rocket, ArrowRight, Star } from "lucide-react";
+import {
+  Check,
+  Zap,
+  Building2,
+  Rocket,
+  ArrowRight,
+  Star,
+  RadioTower,
+  Mountain,
+  Signal,
+  Coins,
+  Landmark,
+} from "lucide-react";
 import Link from "next/link";
 import LogoMarquee from "@/components/LogoMarquee";
 
@@ -249,12 +261,12 @@ export default function PricingPage() {
           <div className="mt-6">
             <LogoMarquee
               items={[
-                "ethio telecom",
-                "Dashen Bank",
-                "Safaricom Ethiopia",
-                "TakaCash",
-                "Zemen Bank",
-                "BN Star Trading",
+                { name: "ethio telecom", icon: RadioTower },
+                { name: "Dashen Bank", icon: Mountain },
+                { name: "Safaricom Ethiopia", icon: Signal },
+                { name: "TakaCash", icon: Coins },
+                { name: "Zemen Bank", icon: Landmark },
+                { name: "BN Star Trading", icon: Star },
               ]}
             />
           </div>
