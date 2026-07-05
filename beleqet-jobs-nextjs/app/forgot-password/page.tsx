@@ -16,11 +16,14 @@ export default function ForgotPasswordPage() {
     event.preventDefault();
     setLoading(true);
     setMessage("");
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 15_000);
     try {
       const response = await fetch(`${API_URL}/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
+        signal: controller.signal,
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok)
@@ -32,9 +35,14 @@ export default function ForgotPasswordPage() {
       );
     } catch (err) {
       setMessage(
-        err instanceof Error ? err.message : "The request could not be completed.",
+        err instanceof DOMException && err.name === "AbortError"
+          ? "The server took too long to respond. Please try again."
+          : err instanceof Error
+            ? err.message
+            : "The request could not be completed.",
       );
     } finally {
+      window.clearTimeout(timeout);
       setLoading(false);
     }
   }

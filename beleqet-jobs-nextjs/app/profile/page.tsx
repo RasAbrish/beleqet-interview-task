@@ -108,6 +108,8 @@ export default function ProfilePage() {
   }
 
   async function changeAvatar(event: ChangeEvent<HTMLInputElement>) {
+    if (!user || !profile) return;
+    const currentUser = user;
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
@@ -119,6 +121,11 @@ export default function ProfilePage() {
       toast.error("Profile photo must be smaller than 3 MB");
       return;
     }
+
+    const previousAvatar = profile.avatarUrl;
+    const previewUrl = URL.createObjectURL(file);
+    setProfile((current) => current ? { ...current, avatarUrl: previewUrl } : current);
+    setUser({ ...currentUser, avatarUrl: previewUrl });
     setSaving(true);
     try {
       const body = new FormData();
@@ -132,18 +139,28 @@ export default function ProfilePage() {
       await persistAvatar(result.publicUrl);
       toast.success("Profile photo updated");
     } catch (error) {
+      setProfile((current) => current ? { ...current, avatarUrl: previousAvatar } : current);
+      setUser({ ...currentUser, avatarUrl: previousAvatar });
       toast.error(error instanceof Error ? error.message : "Photo could not be updated");
     } finally {
+      URL.revokeObjectURL(previewUrl);
       setSaving(false);
     }
   }
 
   async function removeAvatar() {
+    if (!user || !profile) return;
+    const currentUser = user;
+    const previousAvatar = profile.avatarUrl;
+    setProfile((current) => current ? { ...current, avatarUrl: null } : current);
+    setUser({ ...currentUser, avatarUrl: null });
     setSaving(true);
     try {
       await persistAvatar(null);
       toast.success("Profile photo removed");
     } catch (error) {
+      setProfile((current) => current ? { ...current, avatarUrl: previousAvatar } : current);
+      setUser({ ...currentUser, avatarUrl: previousAvatar });
       toast.error(error instanceof Error ? error.message : "Photo could not be removed");
     } finally {
       setSaving(false);

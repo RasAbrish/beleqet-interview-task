@@ -207,11 +207,16 @@ export class AuthService {
     const resetUrl = `${this.frontendUrl()}/auth/reset-password?token=${token}`;
     const emailContent = await passwordResetEmail(user.firstName, resetUrl);
 
-    await this.notificationsQueue.add(NOTIFICATION_JOBS.SEND_EMAIL, {
+    // Do not keep the HTTP request open while Bull waits for Redis. Password
+    // reset responses should be identical and immediate whether the account
+    // exists or the notification infrastructure is temporarily unavailable.
+    void this.notificationsQueue.add(NOTIFICATION_JOBS.SEND_EMAIL, {
       to: user.email,
       subject: 'Reset your Beleqet Password',
       ...emailContent,
-    });
+    }).catch((err: Error) =>
+      this.logger.error(`Failed to enqueue password reset email for ${user.email}: ${err.message}`),
+    );
 
     return { success: true, message: 'If an account exists, a reset link was sent.' };
   }
