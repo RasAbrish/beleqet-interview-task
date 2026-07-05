@@ -51,6 +51,10 @@ export class NotificationsProcessor {
   async sendInApp(job: Job<InAppPayload>) {
     const { userId, type, title, body, metadata } = job.data;
     if (!userId) return;
+    const preferences = await this.prisma.$queryRaw<Array<{ inAppNotifications: boolean }>>`
+      SELECT "inAppNotifications" FROM "users" WHERE "id" = ${userId} LIMIT 1
+    `;
+    if (!preferences[0]?.inAppNotifications) return;
     await this.prisma.notification.create({
       data: {
         userId,

@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/components/AuthProvider";
 import ChatWidget from "@/components/ChatWidget";
+import { Toaster } from "sonner";
 
 // Using Inter via next/font/google requires network access to Google Fonts at
 // build time. If your deployment environment can reach fonts.googleapis.com,
@@ -31,6 +32,13 @@ export default function RootLayout({
           <main className="min-w-0 max-w-full overflow-x-hidden">{children}</main>
           <Footer />
           <ChatWidget />
+          <Toaster
+            position="top-right"
+            richColors
+            closeButton
+            duration={4000}
+            toastOptions={{ className: "font-sans" }}
+          />
         </AuthProvider>
       </body>
     </html>

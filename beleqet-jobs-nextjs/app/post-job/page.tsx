@@ -12,14 +12,15 @@ import {
 } from "lucide-react";
 import { authenticatedFetch } from "@/lib/auth";
 import { useAuth } from "@/components/AuthProvider";
+import { toast } from "sonner";
+import type { JobFormCategory } from "@/types/jobs";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
-type Category = { id: string; label: string };
 
 export default function PostJobPage() {
   const { user, ready } = useAuth();
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<JobFormCategory[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [publishedId, setPublishedId] = useState("");
@@ -87,12 +88,13 @@ export default function PostJobPage() {
             : data.message || "Company profile could not be created.",
         );
       setHasCompany(true);
+      toast.success("Company profile created");
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Company profile could not be created.",
-      );
+      const message = err instanceof Error
+        ? err.message
+        : "Company profile could not be created.";
+      setError(message);
+      toast.error(message);
     } finally {
       setCompanyLoading(false);
     }
@@ -141,10 +143,11 @@ export default function PostJobPage() {
             : data.message || "Job could not be published.",
         );
       setPublishedId(data.id);
+      toast.success("Job published successfully");
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Job could not be published.",
-      );
+      const message = err instanceof Error ? err.message : "Job could not be published.";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

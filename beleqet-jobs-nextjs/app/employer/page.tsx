@@ -4,23 +4,10 @@ import Link from "next/link";
 import { BriefcaseBusiness, Eye, Plus, Users } from "lucide-react";
 import { authenticatedFetch } from "@/lib/auth";
 import { useAuth } from "@/components/AuthProvider";
+import { toast } from "sonner";
+import type { Applicant, EmployerJob } from "@/types/applications";
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
-type Job = {
-  id: string;
-  title: string;
-  status: string;
-  createdAt: string;
-  _count: { applications: number };
-};
-type Applicant = {
-  id: string;
-  status: string;
-  createdAt: string;
-  coverLetter?: string;
-  resumeUrl?: string;
-  user: { firstName: string; lastName: string; email: string };
-};
 const statuses = [
   "SUBMITTED",
   "SCREENING",
@@ -32,8 +19,8 @@ const statuses = [
 
 export default function EmployerPage() {
   const { user, ready } = useAuth();
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [selected, setSelected] = useState<Job | null>(null);
+  const [jobs, setJobs] = useState<EmployerJob[]>([]);
+  const [selected, setSelected] = useState<EmployerJob | null>(null);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const loadJobs = useCallback(async () => {
     const response = await authenticatedFetch(`${API_URL}/jobs/my`);
@@ -42,7 +29,7 @@ export default function EmployerPage() {
   useEffect(() => {
     if (user && ["EMPLOYER", "ADMIN"].includes(user.role)) loadJobs();
   }, [user, loadJobs]);
-  async function openApplicants(job: Job) {
+  async function openApplicants(job: EmployerJob) {
     setSelected(job);
     const response = await authenticatedFetch(
       `${API_URL}/applications/job/${job.id}`,
@@ -58,7 +45,12 @@ export default function EmployerPage() {
         body: JSON.stringify({ status }),
       },
     );
-    if (response.ok && selected) openApplicants(selected);
+    if (response.ok) {
+      if (selected) await openApplicants(selected);
+      toast.success("Application status updated");
+    } else {
+      toast.error("Application status could not be updated");
+    }
   }
   if (!ready || !user || !["EMPLOYER", "ADMIN"].includes(user.role))
     return (

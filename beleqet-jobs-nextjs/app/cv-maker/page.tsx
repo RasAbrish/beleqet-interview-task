@@ -18,37 +18,11 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { authenticatedFetch } from "@/lib/auth";
+import { toast } from "sonner";
+import type { CvData, Education, Experience } from "@/types/cv";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
-
-type Experience = {
-  id: number;
-  role: string;
-  company: string;
-  start: string;
-  end: string;
-  description: string;
-};
-type Education = {
-  id: number;
-  school: string;
-  qualification: string;
-  year: string;
-};
-type CvData = {
-  fullName: string;
-  title: string;
-  email: string;
-  phone: string;
-  location: string;
-  website: string;
-  summary: string;
-  skills: string;
-  languages: string;
-  experience: Experience[];
-  education: Education[];
-};
 
 const emptyCv: CvData = {
   fullName: "",
@@ -127,9 +101,13 @@ export default function CvMakerPage() {
         body: JSON.stringify({ data: cv }),
       });
       setSaved(response.ok);
+      response.ok
+        ? toast.success("CV draft saved")
+        : toast.error("CV draft could not be saved");
     } else {
       localStorage.setItem("beleqet_cv_draft", JSON.stringify(cv));
       setSaved(true);
+      toast.success("CV draft saved on this device");
     }
   }
   async function generateSummary() {
@@ -155,12 +133,13 @@ export default function CvMakerPage() {
         throw new Error(data.error || "Could not generate a summary.");
       field("summary", data.summary);
       setSaved(false);
+      toast.success("Professional summary generated");
     } catch (error) {
-      setAiError(
-        error instanceof Error
-          ? error.message
-          : "Could not generate a summary.",
-      );
+      const message = error instanceof Error
+        ? error.message
+        : "Could not generate a summary.";
+      setAiError(message);
+      toast.error(message);
     } finally {
       setAiLoading(false);
     }
@@ -171,10 +150,12 @@ export default function CvMakerPage() {
     setUploadError("");
     if (file.size > 5 * 1024 * 1024) {
       setUploadError("Please choose a file smaller than 5 MB.");
+      toast.error("Please choose a file smaller than 5 MB");
       e.target.value = "";
       return;
     }
     setUploadedFile(file.name);
+    toast.success("CV file selected");
   }
 
   return (

@@ -7,6 +7,7 @@ import { Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 import { loginUser } from "@/lib/auth";
 import { useAuth } from "@/components/AuthProvider";
+import { toast } from "sonner";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email address"),
@@ -34,16 +35,20 @@ export default function LoginForm() {
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
       setError(parsed.error.issues[0].message);
+      toast.error(parsed.error.issues[0].message);
       return;
     }
     setLoading(true);
     try {
       const user = await loginUser(parsed.data);
       setUser(user);
+      toast.success("Welcome back");
       const next = new URLSearchParams(window.location.search).get("next");
       router.push(next?.startsWith("/") ? next : "/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      const message = err instanceof Error ? err.message : "Login failed";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

@@ -7,6 +7,7 @@ import { User, Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 import { registerUser, type RegisterInput } from "@/lib/auth";
 import { useAuth } from "@/components/AuthProvider";
+import { toast } from "sonner";
 
 const roles: { value: RegisterInput["role"]; label: string }[] = [
   { value: "JOB_SEEKER", label: "Job Seeker" },
@@ -49,15 +50,19 @@ export default function RegisterForm() {
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
       setError(parsed.error.issues[0].message);
+      toast.error(parsed.error.issues[0].message);
       return;
     }
     setLoading(true);
     try {
       const user = await registerUser(parsed.data);
       setUser(user);
+      toast.success("Account created successfully");
       router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
+      const message = err instanceof Error ? err.message : "Registration failed";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

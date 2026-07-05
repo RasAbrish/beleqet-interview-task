@@ -1,5 +1,7 @@
 import axios from "axios";
 import { z } from "zod";
+import type { Category, Job } from "@/types/jobs";
+export type { Category, Job } from "@/types/jobs";
 
 const rawJobSchema = z.object({
   id: z.string(),
@@ -28,26 +30,6 @@ const rawCategorySchema = z.object({
 
 type RawJob = z.infer<typeof rawJobSchema>;
 type RawCategory = z.infer<typeof rawCategorySchema>;
-
-export type Job = {
-  id: string;
-  title: string;
-  company: string;
-  location: string;
-  type: string;
-  category: string;
-  postedAgo: string;
-  featured?: boolean;
-  description?: string;
-  tags?: string[];
-};
-
-export type Category = {
-  id: string;
-  label: string;
-  icon: string;
-  count?: string;
-};
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1",

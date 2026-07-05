@@ -1,0 +1,4 @@
+ALTER TABLE "users"
+ADD COLUMN "emailNotifications" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN "inAppNotifications" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN "jobAlerts" BOOLEAN NOT NULL DEFAULT true;

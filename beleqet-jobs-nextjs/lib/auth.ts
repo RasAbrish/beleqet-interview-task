@@ -1,5 +1,7 @@
 import axios from "axios";
 import { z } from "zod";
+import type { AuthUser, LoginInput, RegisterInput } from "@/types/auth";
+export type { AuthUser, LoginInput, RegisterInput } from "@/types/auth";
 
 const authApi = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1",
@@ -14,26 +16,11 @@ export const userSchema = z.object({
   role: z.string(),
 });
 
-export type AuthUser = z.infer<typeof userSchema>;
-
 const authResponseSchema = z.object({
   accessToken: z.string(),
   refreshToken: z.string().nullish(),
   user: userSchema,
 });
-
-export type RegisterInput = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  role: "JOB_SEEKER" | "EMPLOYER" | "FREELANCER";
-};
-
-export type LoginInput = {
-  email: string;
-  password: string;
-};
 
 const TOKEN_KEY = "beleqet_token";
 const REFRESH_KEY = "beleqet_refresh";
@@ -70,6 +57,10 @@ export function clearAuth() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(REFRESH_KEY);
   localStorage.removeItem(USER_KEY);
+}
+
+export function updateStoredUser(user: AuthUser) {
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 
 async function refreshAccessToken(): Promise<string | null> {

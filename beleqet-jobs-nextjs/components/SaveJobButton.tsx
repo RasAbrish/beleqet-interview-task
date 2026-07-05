@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Bookmark, Loader2 } from "lucide-react";
 import { authenticatedFetch } from "@/lib/auth";
 import { useAuth } from "@/components/AuthProvider";
+import { toast } from "sonner";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
@@ -46,7 +47,12 @@ export default function SaveJobButton({
       `${API_URL}/users/saved-jobs/${jobId}`,
       { method: saved ? "DELETE" : "POST" },
     );
-    if (response.ok) setSaved((current) => !current);
+    if (response.ok) {
+      setSaved((current) => !current);
+      toast.success(saved ? "Job removed from saved jobs" : "Job saved");
+    } else {
+      toast.error("Could not update saved jobs");
+    }
     setLoading(false);
   }
 

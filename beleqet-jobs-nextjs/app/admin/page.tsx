@@ -5,33 +5,16 @@ import { BellRing, MessageSquare, Trash2, UserPlus, Users } from "lucide-react";
 import { authenticatedFetch } from "@/lib/auth";
 import { useAuth } from "@/components/AuthProvider";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import type { ContactMessage, ManagedUser } from "@/types/admin";
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 const roles = ["JOB_SEEKER", "EMPLOYER", "FREELANCER", "ADMIN"];
-type ManagedUser = {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  isActive: boolean;
-  createdAt: string;
-};
-type Contact = {
-  id: string;
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  status: string;
-  createdAt: string;
-};
 
 export default function AdminPage() {
   const { user, ready } = useAuth();
   const router = useRouter();
   const [users, setUsers] = useState<ManagedUser[]>([]);
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [contacts, setContacts] = useState<ContactMessage[]>([]);
   const [tab, setTab] = useState("users");
   const [notice, setNotice] = useState("");
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);

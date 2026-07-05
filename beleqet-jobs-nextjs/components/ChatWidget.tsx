@@ -2,10 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, X, Send, Sparkles } from "lucide-react";
+import type { ChatMessage } from "@/types/chat";
 
-type Message = { role: "user" | "assistant"; content: string };
-
-const GREETING: Message = {
+const GREETING: ChatMessage = {
   role: "assistant",
   content: "Hi 👋 I’m the Beleqet Assistant. How can I help you today?",
 };
@@ -144,7 +143,7 @@ function MarkdownContent({ content, isUser }: { content: string; isUser: boolean
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([GREETING]);
+  const [messages, setMessages] = useState<ChatMessage[]>([GREETING]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
@@ -162,7 +161,7 @@ export default function ChatWidget() {
     const clean = text.trim();
     if (!clean || loading) return;
 
-    const next: Message[] = [...messages, { role: "user", content: clean }];
+    const next: ChatMessage[] = [...messages, { role: "user", content: clean }];
     setMessages(next);
     setInput("");
     setLoading(true);

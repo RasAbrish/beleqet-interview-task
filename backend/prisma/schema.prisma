@@ -29,6 +29,9 @@ model User {
   location              String?
   portfolioUrl          String?
   skills                String[]            @default([])
+  emailNotifications    Boolean             @default(true)
+  inAppNotifications    Boolean             @default(true)
+  jobAlerts             Boolean             @default(true)
   applications          Application[]
   bids                  Bid[]
   candidateScores       CandidateScore[]

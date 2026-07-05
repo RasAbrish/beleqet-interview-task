@@ -3,18 +3,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Bell, CheckCheck } from "lucide-react";
 import { authenticatedFetch } from "@/lib/auth";
 import { useAuth } from "@/components/AuthProvider";
+import type { NotificationItem } from "@/types/user";
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
-type Item = {
-  id: string;
-  title: string;
-  body: string;
-  read: boolean;
-  createdAt: string;
-};
 export default function NotificationBell() {
   const { user } = useAuth();
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, setItems] = useState<NotificationItem[]>([]);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const load = useCallback(async () => {
@@ -37,7 +31,7 @@ export default function NotificationBell() {
   }, []);
   if (!user) return null;
   const unread = items.filter((item) => !item.read).length;
-  async function read(item: Item) {
+  async function read(item: NotificationItem) {
     if (!item.read) {
       await authenticatedFetch(
         `${API_URL}/users/notifications/${item.id}/read`,

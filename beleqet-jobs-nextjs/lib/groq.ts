@@ -1,4 +1,4 @@
-type GroqMessage = { role: "system" | "user" | "assistant"; content: string };
+import type { GroqMessage } from "@/types/chat";
 
 export class GroqError extends Error {
   constructor(

@@ -9,6 +9,7 @@ import {
   MessageSquareText,
   Send,
 } from "lucide-react";
+import { toast } from "sonner";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
@@ -42,11 +43,12 @@ export default function ContactPage() {
             : data.message || "Message could not be sent.",
         );
       setReference(data.reference);
+      toast.success("Message sent successfully");
       event.currentTarget.reset();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Message could not be sent.",
-      );
+      const message = err instanceof Error ? err.message : "Message could not be sent.";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

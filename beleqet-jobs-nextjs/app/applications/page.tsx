@@ -12,33 +12,14 @@ import {
 import { authenticatedFetch } from "@/lib/auth";
 import { useAuth } from "@/components/AuthProvider";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { toast } from "sonner";
+import type { SavedJob, UserApplication } from "@/types/applications";
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
-type Application = {
-  id: string;
-  status: string;
-  createdAt: string;
-  job: {
-    id: string;
-    title: string;
-    location: string;
-    company: { name: string };
-  };
-};
-type Saved = {
-  id: string;
-  job: {
-    id: string;
-    title: string;
-    location: string;
-    company: { name: string };
-  };
-};
-
 export default function ApplicationsPage() {
   const { user, ready } = useAuth();
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [saved, setSaved] = useState<Saved[]>([]);
+  const [applications, setApplications] = useState<UserApplication[]>([]);
+  const [saved, setSaved] = useState<SavedJob[]>([]);
   const [tab, setTab] = useState("applications");
   const [withdrawId, setWithdrawId] = useState<string | null>(null);
   const load = useCallback(async () => {
@@ -63,14 +44,24 @@ export default function ApplicationsPage() {
       `${API_URL}/applications/${id}/withdraw`,
       { method: "PATCH" },
     );
-    if (response.ok) await load();
+    if (response.ok) {
+      await load();
+      toast.success("Application withdrawn");
+    } else {
+      toast.error("Application could not be withdrawn");
+    }
     setWithdrawId(null);
   }
   async function unsave(jobId: string) {
-    await authenticatedFetch(`${API_URL}/users/saved-jobs/${jobId}`, {
+    const response = await authenticatedFetch(`${API_URL}/users/saved-jobs/${jobId}`, {
       method: "DELETE",
     });
-    load();
+    if (response.ok) {
+      await load();
+      toast.success("Job removed from saved jobs");
+    } else {
+      toast.error("Saved job could not be removed");
+    }
   }
   return (
     <div className="min-h-screen bg-[#f7f5ef]">

@@ -1,14 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { AuthUser, clearAuth, getStoredUser } from "@/lib/auth";
-
-type AuthContextValue = {
-  user: AuthUser | null;
-  ready: boolean;
-  setUser: (user: AuthUser | null) => void;
-  logout: () => void;
-};
+import { clearAuth, getStoredUser } from "@/lib/auth";
+import type { AuthContextValue, AuthUser } from "@/types/auth";
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 

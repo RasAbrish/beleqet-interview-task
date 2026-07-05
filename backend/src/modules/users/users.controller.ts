@@ -4,7 +4,13 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator';
 import { UsersService } from './users.service';
-import { UpdateUserDto, CreateCompanyDto, SaveCvDraftDto } from './dto/update-user.dto';
+import {
+  ChangePasswordDto,
+  CreateCompanyDto,
+  NotificationPreferencesDto,
+  SaveCvDraftDto,
+  UpdateUserDto,
+} from './dto/update-user.dto';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -21,6 +27,24 @@ export class UsersController {
   @Patch('profile')
   update(@CurrentUser() u: CurrentUserPayload, @Body() dto: UpdateUserDto) {
     return this.svc.update(u.userId, dto);
+  }
+
+  @Patch('password')
+  changePassword(@CurrentUser() u: CurrentUserPayload, @Body() dto: ChangePasswordDto) {
+    return this.svc.changePassword(u.userId, dto);
+  }
+
+  @Get('notification-preferences')
+  notificationPreferences(@CurrentUser() u: CurrentUserPayload) {
+    return this.svc.getNotificationPreferences(u.userId);
+  }
+
+  @Put('notification-preferences')
+  updateNotificationPreferences(
+    @CurrentUser() u: CurrentUserPayload,
+    @Body() dto: NotificationPreferencesDto,
+  ) {
+    return this.svc.updateNotificationPreferences(u.userId, dto);
   }
 
   @Get('company')

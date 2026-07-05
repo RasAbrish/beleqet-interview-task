@@ -1,7 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
-import { UpdateUserDto, CreateCompanyDto } from './dto/update-user.dto';
+import {
+  ChangePasswordDto,
+  CreateCompanyDto,
+  NotificationPreferencesDto,
+  UpdateUserDto,
+} from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -32,11 +38,11 @@ export class UsersService {
       },
     });
     if (!user) throw new NotFoundException('User not found');
-    return user;
+    return { ...user, ...(await this.getNotificationPreferences(id)) };
   }
 
   async update(id: string, dto: UpdateUserDto) {
-    return this.prisma.user.update({
+    const user = await this.prisma.user.update({
       where: { id },
       data: dto,
       select: {
@@ -60,6 +66,54 @@ export class UsersService {
         skills: true,
       },
     });
+    return { ...user, ...(await this.getNotificationPreferences(id)) };
+  }
+
+  async changePassword(id: string, dto: ChangePasswordDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: { passwordHash: true },
+    });
+    if (!user) throw new NotFoundException('User not found');
+    if (!(await bcrypt.compare(dto.currentPassword, user.passwordHash)))
+      throw new UnauthorizedException('Current password is incorrect');
+    if (dto.currentPassword === dto.newPassword)
+      throw new BadRequestException('New password must be different from the current password');
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id },
+        data: { passwordHash: await bcrypt.hash(dto.newPassword, 12) },
+      }),
+      this.prisma.refreshToken.deleteMany({ where: { userId: id } }),
+    ]);
+    return { message: 'Password changed successfully' };
+  }
+
+  async getNotificationPreferences(id: string) {
+    const rows = await this.prisma.$queryRaw<Array<{
+      emailNotifications: boolean;
+      inAppNotifications: boolean;
+      jobAlerts: boolean;
+    }>>`
+      SELECT "emailNotifications", "inAppNotifications", "jobAlerts"
+      FROM "users" WHERE "id" = ${id} LIMIT 1
+    `;
+    if (!rows[0]) throw new NotFoundException('User not found');
+    return rows[0];
+  }
+
+  async updateNotificationPreferences(id: string, dto: NotificationPreferencesDto) {
+    const count = await this.prisma.$executeRaw`
+      UPDATE "users" SET
+        "emailNotifications" = ${dto.emailNotifications},
+        "inAppNotifications" = ${dto.inAppNotifications},
+        "jobAlerts" = ${dto.jobAlerts},
+        "updatedAt" = NOW()
+      WHERE "id" = ${id}
+    `;
+    if (!count) throw new NotFoundException('User not found');
+    return dto;
   }
 
   async createCompany(userId: string, dto: CreateCompanyDto) {

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Bookmark, CheckCircle2, FileUp, Send, X } from "lucide-react";
 import { authenticatedFetch } from "@/lib/auth";
 import { useAuth } from "@/components/AuthProvider";
+import { toast } from "sonner";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
@@ -48,7 +49,12 @@ export default function JobActions({ jobId }: { jobId: string }) {
       `${API_URL}/users/saved-jobs/${jobId}`,
       { method: saved ? "DELETE" : "POST" },
     );
-    if (response.ok) setSaved(!saved);
+    if (response.ok) {
+      setSaved(!saved);
+      toast.success(saved ? "Job removed from saved jobs" : "Job saved");
+    } else {
+      toast.error("Could not update saved jobs");
+    }
   }
 
   function startApplication() {
@@ -120,12 +126,13 @@ export default function JobActions({ jobId }: { jobId: string }) {
         );
       setApplied(true);
       setOpen(false);
+      toast.success("Application submitted successfully");
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Application could not be submitted.",
-      );
+      const message = err instanceof Error
+        ? err.message
+        : "Application could not be submitted.";
+      setError(message);
+      toast.error(message);
     } finally {
       setApplying(false);
     }
