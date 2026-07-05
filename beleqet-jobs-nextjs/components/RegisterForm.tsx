@@ -57,8 +57,8 @@ export default function RegisterForm() {
     try {
       const user = await registerUser(parsed.data);
       setUser(user);
-      toast.success("Account created successfully");
-      router.push("/");
+      toast.success(`Welcome to Beleqet, ${user.firstName}!`);
+      router.push("/welcome");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Registration failed";
       setError(message);
