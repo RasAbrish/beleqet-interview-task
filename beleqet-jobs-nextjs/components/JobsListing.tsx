@@ -46,8 +46,8 @@ export default function JobsListing({
   }
 
   return (
-    <div className="container-page py-10">
-      <div className="mb-6">
+    <div className="container-page py-10 lg:flex lg:h-[calc(100dvh-72px)] lg:flex-col lg:overflow-hidden">
+      <div className="mb-6 shrink-0">
         <h1 className="text-pageH1">Search verified jobs from trusted employers.</h1>
         <p className="text-muted text-sm mt-2">
           <span className="font-semibold text-ink">{filtered.length}</span> job{filtered.length === 1 ? "" : "s"} found
@@ -56,7 +56,7 @@ export default function JobsListing({
 
       <form
         onSubmit={(e) => e.preventDefault()}
-        className="bg-white rounded-2xl border border-border p-2 flex flex-col sm:flex-row gap-2 mb-4 shadow-card"
+        className="mb-4 flex shrink-0 flex-col gap-2 rounded-2xl border border-border bg-white p-2 shadow-card sm:flex-row"
       >
         <div className="flex items-center flex-1 gap-2 px-3 py-2.5 rounded-xl">
           <Search className="h-4 w-4 text-muted shrink-0" />
@@ -86,7 +86,7 @@ export default function JobsListing({
       </form>
 
       {hasFilters && (
-        <div className="flex flex-wrap items-center gap-2 mb-8">
+        <div className="mb-4 flex shrink-0 flex-wrap items-center gap-2">
           {query && <FilterChip label={`“${query}”`} onClear={() => setQuery("")} />}
           {location && <FilterChip label={location} onClear={() => setLocation("")} />}
           {category && <FilterChip label={categoryLabel ?? category} onClear={() => setCategory("")} />}
@@ -97,13 +97,13 @@ export default function JobsListing({
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8">
-        <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+      <div className="grid grid-cols-1 gap-8 lg:min-h-0 lg:flex-1 lg:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className="space-y-6 lg:h-full lg:min-h-0 lg:overflow-hidden">
           <div className="rounded-xl border border-border bg-white p-5">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-ink mb-4">
               <SlidersHorizontal className="h-4 w-4" /> Category
             </h3>
-            <div className="space-y-1 max-h-80 overflow-y-auto pr-1">
+            <div className="max-h-80 space-y-1 overflow-y-auto pr-1 lg:max-h-[calc(100dvh-465px)]">
               <FilterButton active={category === ""} onClick={() => setCategory("")}>
                 All Categories
               </FilterButton>
@@ -133,7 +133,7 @@ export default function JobsListing({
           </div>
         </aside>
 
-        <div>
+        <div className="min-w-0 lg:h-full lg:overflow-y-auto lg:overscroll-contain lg:pr-2">
           {filtered.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border bg-white p-12 text-center">
               <p className="text-ink font-semibold">No jobs match your filters</p>

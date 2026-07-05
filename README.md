@@ -1,164 +1,182 @@
-# Beleqet Jobs — Full-Stack Hiring Platform
+<div align="center">
+  <img src="docs/beleqet-hero.svg" alt="Beleqet — Hiring, thoughtfully connected" width="100%" />
 
-A production-ready hiring and freelance platform for the Ethiopian market: a **NestJS** API
-(jobs, applications, AI screening, escrow, wallet, real-time chat) and a **Next.js 14** frontend
-that consumes it live.
+  <br />
 
-| Layer | Stack | Location |
+  <a href="https://beleqet-interview-task-mu.vercel.app"><img alt="Live demo" src="https://img.shields.io/badge/LIVE_DEMO-00653B?style=for-the-badge&logo=vercel&logoColor=white" /></a>
+  <a href="https://beleqet-backend.onrender.com/api/v1/jobs/categories"><img alt="API status" src="https://img.shields.io/badge/API-ONLINE-d8ff3e?style=for-the-badge&logo=render&logoColor=041603" /></a>
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js_14-041603?style=for-the-badge&logo=next.js&logoColor=white" />
+  <img alt="NestJS" src="https://img.shields.io/badge/NestJS-041603?style=for-the-badge&logo=nestjs&logoColor=E0234E" />
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-041603?style=for-the-badge&logo=typescript&logoColor=3178C6" />
+
+  <h3>One platform for opportunities, talent, and trusted hiring.</h3>
+  <p>Beleqet is a production-ready hiring and freelance platform designed for the Ethiopian market.</p>
+
+  [Explore the platform](https://beleqet-interview-task-mu.vercel.app) · [Browse jobs](https://beleqet-interview-task-mu.vercel.app/jobs) · [API reference](backend/README.md) · [Frontend guide](beleqet-jobs-nextjs/README.md)
+</div>
+
+---
+
+## ✦ Why Beleqet
+
+Beleqet brings the full hiring journey into one coherent product—from discovering a role to screening applicants and managing employer workflows. It pairs a refined, responsive interface with a modular API, reliable background processing, and secure account controls.
+
+| | Capability | What it delivers |
+|---:|---|---|
+| 🔎 | **Job discovery** | Search, location, category, and work-type filtering with a focused jobs workspace |
+| ⚡ | **Fast applications** | Resume upload, cover letter, portfolio, salary expectations, and application tracking |
+| 🏢 | **Employer workspace** | Company setup, vacancy publishing, applicant review, and candidate status management |
+| ✨ | **AI-assisted screening** | Queue-driven candidate scoring and professional CV-summary assistance |
+| 🧾 | **CV studio** | Draft persistence, live preview, document import, and print-ready export |
+| 🔐 | **Account management** | Profile editing, password rotation, session invalidation, and notification preferences |
+| 💬 | **Communication** | In-app notifications, email workflows, Telegram integration, contact inbox, and chat |
+| 💳 | **Freelance infrastructure** | Gigs, bids, contracts, milestones, escrow, and wallet foundations |
+
+## Architecture
+
+<div align="center">
+  <img src="docs/architecture.svg" alt="Beleqet system architecture" width="100%" />
+</div>
+
+| Layer | Technology | Responsibility |
 |---|---|---|
-| **Backend API** | NestJS · Prisma · PostgreSQL · Redis (BullMQ) · JWT · Swagger | [`backend/`](backend) |
-| **Frontend** | Next.js 14 (App Router) · TypeScript · Tailwind · axios · zod | [`beleqet-jobs-nextjs/`](beleqet-jobs-nextjs) |
-| **Deploy** | Neon (Postgres) · Render (API + Redis) · Vercel (frontend) | [`render.yaml`](render.yaml) |
+| **Web application** | Next.js 14 · React · TypeScript · Tailwind CSS | Responsive UI, server rendering, authenticated workflows |
+| **API** | NestJS · Prisma · JWT · Swagger | Business rules, validation, authorization, REST endpoints |
+| **Data** | PostgreSQL | Users, jobs, applications, profiles, payments, audit events |
+| **Async processing** | Redis · BullMQ | Screening, analytics, notifications, and scheduled work |
+| **Integrations** | Cloudflare R2 · SMTP · Groq/OpenAI · Telegram · Chapa | Files, messaging, AI assistance, and payments |
 
----
+## Product surfaces
 
-## Live demo
-
-- **Frontend:** https://beleqet-interview-task-mu.vercel.app
-- **Jobs page:** https://beleqet-interview-task-mu.vercel.app/jobs
-- **API base:** https://beleqet-backend.onrender.com/api/v1
-- **API health check:** https://beleqet-backend.onrender.com/api/v1/jobs/categories
-
-> The Render free-tier API may take about a minute to respond after a period of inactivity.
-> Swagger is available locally at `/api/docs` and disabled in production.
-
-**Seeded demo login** (created automatically on deploy):
-
-```
-Email:    employer@beleqet.demo
-Password: Password123!
+```text
+Public                 Job seeker                 Employer                 Platform
+├─ Home                ├─ Job search              ├─ Company profile       ├─ Admin console
+├─ Jobs                ├─ Saved jobs              ├─ Publish vacancy       ├─ Contact inbox
+├─ Job details         ├─ Applications            ├─ Applicant review      ├─ Broadcasts
+├─ Pricing             ├─ CV maker                └─ Status workflow       └─ Audit events
+└─ About / Contact     └─ Account settings
 ```
 
----
+## Repository
 
-## Features
+```text
+.
+├── backend/                    NestJS API, Prisma schema, workers, and tests
+├── beleqet-jobs-nextjs/        Next.js application, components, routes, and types
+├── docs/                       README artwork and architecture diagrams
+├── render.yaml                 Render infrastructure blueprint
+└── Beleqet_System_Architecture.docx
+```
 
-**Backend**
-- JWT auth (register / login / refresh / logout) with rotating refresh tokens and RBAC
-  (`ADMIN` / `EMPLOYER` / `JOB_SEEKER` / `FREELANCER`)
-- Jobs: CRUD + paginated public search & filtering
-- Applications → event-driven AI screening pipeline (BullMQ workers)
-- Freelance: gigs, bids, contracts, milestones
-- BeleqetSafe escrow (Chapa webhook + auto-release) and freelancer wallet
-- Hardening: `helmet`, global `ValidationPipe`, rate limiting (`@nestjs/throttler`),
-  consistent exception filter, Swagger docs, graceful shutdown
+## Quick start
 
-**Frontend**
-- Live data via **axios**, validated at the boundary with **zod** (no `any` from the API)
-- Server-Component data fetching (SEO-friendly) with **ISR caching** (`revalidate`)
-- **Skeleton** loading states + Suspense streaming, and route **error boundaries**
-- Full **auth flow**: two-section login & register pages wired to the backend, with a
-  client `AuthProvider`, token persistence, and auth-aware header
-- Searchable job listings with category, location, and work-type filters
-- Job details, authenticated save/unsave, application submission, and application tracking
-- Employer company profile, job posting, applicant management, and status updates
-- CV builder with draft persistence, document import, live preview, print/export, and Groq assistance
-- Contact form, notifications, role-aware navigation, and admin management screens
+### Prerequisites
 
----
+- Node.js 20+
+- Docker and Docker Compose
+- npm 10+
 
-## Reviewer guide
-
-Suggested review path:
-
-1. Open the live site and browse `/jobs`; test search and filters.
-2. Register as a job seeker, save a job, submit an application, and view `/applications`.
-3. Open `/cv-maker`, complete a CV, save the draft, and test the print/export preview.
-4. Register as an employer, complete the company profile, post a job, and review applicants.
-5. Review the API architecture, validation, queues, Prisma schema, and Swagger documentation locally.
-
-The project intentionally separates public, job-seeker, employer, and admin workflows. External
-services such as Groq/OpenAI, object storage, Telegram, SMTP, and Chapa require their respective
-environment variables; the core jobs, auth, profile, saved-job, CV-draft, and application flows do
-not require those optional integrations.
-
----
-
-## Quick start (local)
-
-Requirements: **Docker Desktop** and **Node.js 20+**.
-
-### 1. Backend + database + Redis (Docker)
+### 1. Start the backend stack
 
 ```bash
 cd backend
+cp .env.example .env
 docker compose up -d --build
 ```
 
-This starts PostgreSQL, Redis, and the API, runs migrations, and seeds demo data.
+The stack exposes:
 
-- API → http://localhost:4000/api/v1
-- Swagger → http://localhost:4000/api/docs
+- API: `http://localhost:4000/api/v1`
+- Swagger: `http://localhost:4000/api/docs`
+- PostgreSQL: `localhost:5432`
+- Redis: `localhost:6379`
 
-### 2. Frontend
+### 2. Start the web application
 
 ```bash
 cd beleqet-jobs-nextjs
+cp .env.example .env.local
 npm install
-cp .env.example .env.local        # NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
 npm run dev
 ```
 
-Open http://localhost:3000. Verify the production frontend with:
+Open `http://localhost:3000`.
+
+### 3. Prepare demo data when needed
 
 ```bash
+cd backend
+npm run prisma:generate
+npm run prisma:migrate
+npm run prisma:seed
+```
+
+## Configuration
+
+### Frontend
+
+| Variable | Required | Example |
+|---|:---:|---|
+| `NEXT_PUBLIC_API_URL` | ✓ | `http://localhost:4000/api/v1` |
+| `GROQ_API_KEY` | Optional | Server-side CV/chat assistance |
+| `GROQ_MODEL` | Optional | `llama-3.1-8b-instant` |
+
+### Backend
+
+Core configuration lives in [`backend/.env.example`](backend/.env.example).
+
+| Group | Variables |
+|---|---|
+| **Core** | `DATABASE_URL`, `REDIS_HOST`, `REDIS_PORT`, `JWT_ACCESS_SECRET` |
+| **Cloud storage** | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_PUBLIC_BASE_URL` |
+| **Email** | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` |
+| **Optional services** | `OPENAI_API_KEY`, `TELEGRAM_BOT_TOKEN`, `CHAPA_SECRET_KEY`, `CHAPA_WEBHOOK_SECRET` |
+
+> Never expose backend secrets through `NEXT_PUBLIC_*` variables. The R2 bucket must exist and its name must exactly match `R2_BUCKET_NAME`.
+
+## Quality gates
+
+```bash
+# Backend
+cd backend
+npm run build
+npm test -- --runInBand
+
+# Frontend
+cd beleqet-jobs-nextjs
+npx tsc --noEmit
 npm run build
 ```
 
----
-
-## Environment variables
-
-**Frontend** (`beleqet-jobs-nextjs/.env.local`)
-
-| Variable | Example |
-|---|---|
-| `NEXT_PUBLIC_API_URL` | `http://localhost:4000/api/v1` |
-
-**Backend** — see [`backend/.env.example`](backend/.env.example). Required for boot:
-`DATABASE_URL`, `REDIS_HOST`, `REDIS_PORT`, `JWT_ACCESS_SECRET`. Optional integrations
-(`OPENAI_API_KEY`, `TELEGRAM_BOT_TOKEN`, `CHAPA_*`) degrade gracefully with placeholders.
-
----
+The project includes DTO validation, typed API boundaries, route error states, authorization guards, rate limiting, structured errors, and background-job isolation.
 
 ## Deployment
 
-The stack deploys to three free-tier services. Deploy in order.
+### Render
 
-### 1. Database — Neon
-1. Create a project at [neon.tech](https://neon.tech).
-2. Copy the connection string (ends with `?sslmode=require`) — this is your `DATABASE_URL`.
+[`render.yaml`](render.yaml) provisions the backend, PostgreSQL, Redis, and frontend services. Add all `sync: false` secrets in the Render dashboard before deploying.
 
-### 2. API + Redis — Render (Blueprint)
-1. [render.com](https://render.com) → **New ➜ Blueprint** → select this repo.
-2. `render.yaml` provisions the Docker web service + managed Redis. Click **Apply**.
-3. When prompted, set:
-   - `DATABASE_URL` → the Neon string
-   - `FRONTEND_URL` → `*` (update after step 3)
-4. Once **Live**, note the URL, e.g. `https://beleqet-backend.onrender.com`.
+### Vercel
 
-### 3. Frontend — Vercel
-1. [vercel.com](https://vercel.com) → **Add New ➜ Project** → import this repo.
-2. Set **Root Directory** to `beleqet-jobs-nextjs`.
-3. Add env var `NEXT_PUBLIC_API_URL` = `https://<your-backend>.onrender.com/api/v1`.
-4. Deploy.
+For a separate frontend deployment:
 
-### 4. Connect (CORS)
-In Render, set `FRONTEND_URL` to your Vercel URL and redeploy.
+1. Import this repository.
+2. Set the root directory to `beleqet-jobs-nextjs`.
+3. Add `NEXT_PUBLIC_API_URL=https://<backend-host>/api/v1`.
+4. Set the backend `FRONTEND_URL` to the deployed frontend origin.
 
-> Free-tier note: the Render service sleeps after ~15 min idle; the first request then takes
-> ~50s to wake.
+> Render free services may take additional time to answer their first request after inactivity.
+
+## Documentation
+
+- [Backend modules and API routes](backend/README.md)
+- [Frontend structure and design system](beleqet-jobs-nextjs/README.md)
+- [Render infrastructure blueprint](render.yaml)
+- [Postman collection](backend/Beleqet-API.postman_collection.json)
 
 ---
 
-## Repository layout
-
-```
-backend/                 NestJS API (see backend/README.md)
-beleqet-jobs-nextjs/     Next.js frontend (see its README.md)
-render.yaml              Render Blueprint (API + Redis)
-```
-
-## Further docs
-- Backend modules, routes, and workflow → [`backend/README.md`](backend/README.md)
-- Frontend structure and design tokens → [`beleqet-jobs-nextjs/README.md`](beleqet-jobs-nextjs/README.md)
+<div align="center">
+  <img src="beleqet-jobs-nextjs/app/icon.svg" width="48" alt="Beleqet icon" />
+  <p><strong>Beleqet.</strong><br />Built for opportunity. Designed for trust.</p>
+</div>
