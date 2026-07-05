@@ -1,6 +1,4 @@
-import Link from "next/link";
 import {
-  ArrowRight,
   BriefcaseBusiness,
   Building2,
   CheckCircle2,
@@ -9,6 +7,7 @@ import {
   Search,
   Users,
 } from "lucide-react";
+import AboutCTAActions from "@/components/AboutCTAActions";
 
 const values = [
   {
@@ -146,20 +145,7 @@ export default function AboutPage() {
               profile.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/jobs"
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-white"
-            >
-              Find jobs <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/register"
-              className="rounded-full border border-primary/20 px-5 py-3 text-sm font-bold text-primary"
-            >
-              Create account
-            </Link>
-          </div>
+          <AboutCTAActions />
         </div>
       </section>
     </div>

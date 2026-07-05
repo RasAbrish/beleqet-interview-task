@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MapPin, Building2 } from "lucide-react";
 import type { Job } from "@/lib/api";
 import SaveJobButton from "@/components/SaveJobButton";
+import ShareJobButton from "@/components/ShareJobButton";
 
 export default function JobCard({
   job,
@@ -24,7 +25,15 @@ export default function JobCard({
         <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#d8ff3e] text-primary">
           <Building2 className="h-5 w-5" />
         </span>
-        <SaveJobButton jobId={job.id} light={isLight} />
+        <div className="flex items-center gap-1.5">
+          <ShareJobButton
+            jobId={job.id}
+            title={job.title}
+            company={job.company}
+            light={isLight}
+          />
+          <SaveJobButton jobId={job.id} light={isLight} />
+        </div>
       </div>
 
       <Link href={`/jobs/${job.id}`} className="flex flex-1 flex-col">
