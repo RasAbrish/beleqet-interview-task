@@ -84,6 +84,20 @@ export class AuthService {
         this.logger.error(`Failed to enqueue welcome email for ${user.email}: ${err.message}`)
       );
 
+    // In-app welcome notification (the bell) — mirrors the welcome email
+    this.notificationsQueue
+      .add(NOTIFICATION_JOBS.SEND_IN_APP, {
+        userId: user.id,
+        type: 'account.welcome',
+        title: `Welcome to Beleqet, ${user.firstName}! 🎉`,
+        body:
+          'Your account is ready. Complete your profile and verify your email to get the most out of Beleqet.',
+        metadata: { url: dashboardUrl },
+      })
+      .catch((err) =>
+        this.logger.error(`Failed to enqueue welcome notification for ${user.email}: ${err.message}`)
+      );
+
     return this.issueTokens(user);
   }
 
