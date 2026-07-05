@@ -28,18 +28,18 @@ export default async function JobDetailPage({
         <ArrowLeft className="h-4 w-4" /> Back to all jobs
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
-        <div>
-          <div className="rounded-2xl border border-border bg-white p-7">
+      <div className="grid min-w-0 grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="min-w-0">
+          <div className="min-w-0 overflow-hidden rounded-2xl border border-border bg-white p-7">
             <div className="flex items-start gap-4">
               <span className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-pageBg text-muted shrink-0">
                 <Building2 className="h-6 w-6" />
               </span>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-extrabold text-ink leading-snug">
+              <div className="min-w-0">
+                <h1 className="break-words text-xl font-extrabold leading-snug text-ink [overflow-wrap:anywhere] sm:text-2xl">
                   {job.title}
                 </h1>
-                <p className="text-muted mt-1">{job.company}</p>
+                <p className="mt-1 break-words text-muted [overflow-wrap:anywhere]">{job.company}</p>
                 <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-muted">
                   <span className="flex items-center gap-1">
                     <MapPin className="h-3.5 w-3.5" /> {job.location}
@@ -58,7 +58,7 @@ export default async function JobDetailPage({
               <h2 className="text-sm font-semibold text-ink mb-3">
                 Job Description
               </h2>
-              <p className="text-sm text-muted leading-relaxed">
+              <p className="max-w-full whitespace-pre-wrap break-words text-sm leading-relaxed text-muted [overflow-wrap:anywhere]">
                 {job.description}
               </p>
             </div>
@@ -68,7 +68,7 @@ export default async function JobDetailPage({
                 {job.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="text-xs font-medium text-muted bg-pageBg border border-border rounded-full px-3 py-1"
+                    className="max-w-full break-words rounded-full border border-border bg-pageBg px-3 py-1 text-xs font-medium text-muted [overflow-wrap:anywhere]"
                   >
                     {tag}
                   </span>
@@ -78,7 +78,7 @@ export default async function JobDetailPage({
           </div>
         </div>
 
-        <aside className="space-y-6">
+        <aside className="min-w-0 space-y-6">
           <JobActions jobId={job.id} />
 
           {related.length > 0 && (

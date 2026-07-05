@@ -159,12 +159,12 @@ export default function JobActions({ jobId }: { jobId: string }) {
 
       {open && (
         <div
-          className="fixed inset-0 z-[70] flex min-w-0 items-end justify-center overflow-x-hidden bg-primary/70 p-0 backdrop-blur-sm sm:items-center sm:p-5"
+          className="fixed inset-0 z-[70] flex min-w-0 items-end justify-center overflow-x-clip bg-primary/70 p-4 backdrop-blur-sm sm:items-center sm:p-5"
           role="dialog"
           aria-modal="true"
           aria-labelledby="application-title"
         >
-          <div className="max-h-[92dvh] min-w-0 w-full max-w-2xl overflow-x-hidden overflow-y-auto rounded-t-[28px] bg-[#f7f5ef] shadow-2xl sm:rounded-[28px]">
+          <div className="max-h-[calc(100dvh-2rem)] min-w-0 w-full max-w-2xl overflow-x-clip overflow-y-auto rounded-[28px] bg-[#f7f5ef] shadow-2xl sm:max-h-[calc(100dvh-2.5rem)]">
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-primary/10 bg-white px-6 py-5">
               <div className="min-w-0 pr-3">
                 <p className="text-xs font-extrabold uppercase tracking-wider text-brandGreen">
@@ -185,7 +185,7 @@ export default function JobActions({ jobId }: { jobId: string }) {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <form onSubmit={submitApplication} className="space-y-5 p-6">
+            <form onSubmit={submitApplication} className="min-w-0 max-w-full space-y-5 p-4 sm:p-6">
               <label className="block text-xs font-bold text-ink">
                 Cover letter
                 <textarea
@@ -240,7 +240,7 @@ export default function JobActions({ jobId }: { jobId: string }) {
               {error && (
                 <p
                   role="alert"
-                  className="rounded-xl bg-redAccent/10 px-4 py-3 text-sm font-semibold text-redAccent"
+                  className="break-words rounded-xl bg-redAccent/10 px-4 py-3 text-sm font-semibold text-redAccent"
                 >
                   {error}
                 </p>
