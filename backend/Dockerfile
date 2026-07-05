@@ -28,5 +28,4 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 
 EXPOSE 4000
-
-CMD sh -c "npx prisma db push && npm run start:prod"
+CMD ["sh", "-c", "(npm run prisma:deploy || npm run prisma:sync) && npm run start:prod"]

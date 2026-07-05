@@ -29,7 +29,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <AuthProvider>
           <Header />
-          <main className="min-w-0 max-w-full overflow-x-hidden">{children}</main>
+          <main className="min-w-0 max-w-full overflow-x-hidden pt-[72px]">{children}</main>
           <Footer />
           <ChatWidget />
           <Toaster

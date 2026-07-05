@@ -1,8 +1,5 @@
-"use client";
-
 import Link from "next/link";
 import { ArrowUpRight, BriefcaseBusiness } from "lucide-react";
-import { usePathname } from "next/navigation";
 
 const footerColumns = [
   {
@@ -35,9 +32,6 @@ const footerColumns = [
 ];
 
 export default function Footer() {
-  const pathname = usePathname();
-  if (pathname === "/jobs") return null;
-
   return (
     <footer className="bg-primary text-white">
       <div className="container-page grid grid-cols-1 gap-12 py-16 md:grid-cols-[1.4fr_1fr_1fr_1fr]">

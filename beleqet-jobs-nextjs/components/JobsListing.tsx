@@ -46,7 +46,7 @@ export default function JobsListing({
   }
 
   return (
-    <div className="container-page py-10 lg:flex lg:h-[calc(100dvh-72px)] lg:flex-col lg:overflow-hidden">
+    <div className="container-page py-10">
       <div className="mb-6 shrink-0">
         <h1 className="text-pageH1">Search verified jobs from trusted employers.</h1>
         <p className="text-muted text-sm mt-2">
@@ -97,13 +97,13 @@ export default function JobsListing({
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-8 lg:min-h-0 lg:flex-1 lg:grid-cols-[260px_minmax(0,1fr)]">
-        <aside className="space-y-6 lg:h-full lg:min-h-0 lg:overflow-hidden">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className="space-y-6 lg:sticky lg:top-24 lg:h-fit lg:self-start">
           <div className="rounded-xl border border-border bg-white p-5">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-ink mb-4">
               <SlidersHorizontal className="h-4 w-4" /> Category
             </h3>
-            <div className="max-h-80 space-y-1 overflow-y-auto pr-1 lg:max-h-[calc(100dvh-465px)]">
+            <div className="max-h-80 space-y-1 overflow-y-auto pr-1">
               <FilterButton active={category === ""} onClick={() => setCategory("")}>
                 All Categories
               </FilterButton>
@@ -133,7 +133,7 @@ export default function JobsListing({
           </div>
         </aside>
 
-        <div className="min-w-0 lg:h-full lg:overflow-y-auto lg:overscroll-contain lg:pr-2">
+        <div className="min-w-0">
           {filtered.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border bg-white p-12 text-center">
               <p className="text-ink font-semibold">No jobs match your filters</p>

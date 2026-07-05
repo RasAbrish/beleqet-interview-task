@@ -63,7 +63,9 @@ export function updateStoredUser(user: AuthUser) {
   localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 
-async function refreshAccessToken(): Promise<string | null> {
+let refreshRequest: Promise<string | null> | null = null;
+
+async function performTokenRefresh(): Promise<string | null> {
   const refreshToken = getRefreshToken();
   if (!refreshToken) return null;
 
@@ -76,6 +78,15 @@ async function refreshAccessToken(): Promise<string | null> {
     clearAuth();
     return null;
   }
+}
+
+function refreshAccessToken(): Promise<string | null> {
+  if (!refreshRequest) {
+    refreshRequest = performTokenRefresh().finally(() => {
+      refreshRequest = null;
+    });
+  }
+  return refreshRequest;
 }
 
 export async function authenticatedFetch(

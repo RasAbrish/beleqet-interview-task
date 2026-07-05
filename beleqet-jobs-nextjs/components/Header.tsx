@@ -33,7 +33,7 @@ export default function Header() {
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-primary/10 bg-[#fffdf8]/90 backdrop-blur-xl">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-primary/10 bg-[#fffdf8]/95 backdrop-blur-xl">
       <div className="container-page flex h-[72px] items-center justify-between">
         <Link
           href="/"
@@ -126,4 +126,3 @@ export default function Header() {
     </header>
   );
 }
-

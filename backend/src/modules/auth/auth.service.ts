@@ -104,8 +104,14 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
-    // Rotate token
-    await this.prisma.refreshToken.delete({ where: { id: storedToken.id } });
+    // Atomically claim the token. Concurrent refresh requests may both read the
+    // same row, but only one is allowed to delete (and therefore rotate) it.
+    const claimed = await this.prisma.refreshToken.deleteMany({
+      where: { id: storedToken.id, token },
+    });
+    if (claimed.count !== 1) {
+      throw new UnauthorizedException('Refresh token has already been used');
+    }
     return this.issueTokens(storedToken.user);
   }
 
